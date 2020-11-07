@@ -16,16 +16,29 @@ Vue.config.productionTip = false
 
 // 建立socket连接，返回socket连接地址
 // 登录成功后，Redis中写入获取的UID
-connect().then(() => {
-	Vue.use(new VueSocketIO({
-		debug: true,
-		connection: "http://localhost:3000"
-	}));
-	new Vue({
-		router,
-		store,
-		render: h => h(App)
-	}).$mount('#app')
-}, err => {
-	console.log(err);
-})
+
+// 获取服务这个接口后续计划由网关提供
+Vue.use(new VueSocketIO({
+	debug: true,
+	connection: "http://localhost:3000"
+}));
+new Vue({
+	router,
+	store,
+	render: h => h(App)
+}).$mount('#app')
+
+
+// connect().then(() => {
+// 	Vue.use(new VueSocketIO({
+// 		debug: true,
+// 		connection: "http://localhost:3000"
+// 	}));
+// 	new Vue({
+// 		router,
+// 		store,
+// 		render: h => h(App)
+// 	}).$mount('#app')
+// }, err => {
+// 	console.log(err);
+// })

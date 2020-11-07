@@ -45,7 +45,7 @@ export default {
 	// 监听服务器推送消息
 	created() {
 		this.initRoom();
-		this.sockets.subscribe("receiveMsg", function(data) {
+		this.sockets.subscribe("receiveUserMsg", function(data) {
 			let {tid, msg} = data;
 			this.renderMsg(tid, msg, 2);
 		});
@@ -57,7 +57,7 @@ export default {
 		initRoom() {
 			const socketId = this.$socket.id;
 			let data = { uid: this.tempUid, socketId };
-			this.$socket.emit("initRoom", data);
+			this.$socket.emit("initUserRoom", data);
 		},
 		/**
 		 * 发送消息
@@ -72,7 +72,7 @@ export default {
 				tid: this.tid
 			};
 			// sendMsg(data);
-			this.$socket.emit("send", data);
+			this.$socket.emit("sendMsgToUser", data);
 			this.renderMsg(this.tempUid, data.msg, 1);
 			this.sendMsg = "";
 		},
