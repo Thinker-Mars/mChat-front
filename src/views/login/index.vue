@@ -32,9 +32,10 @@ export default {
 			let that = this;
 			that.loginForm.validateFields((err, values) => {
 				if (!err) {
-					// 登录，获取UID，储存
-					console.log(values, "values");
-					that.$router.push({path: "/home"})
+					// 建立socket连接，初始化监听
+					that.$store.dispatch("socket/connect").then(() => {
+						that.$router.push({path: "/home"});
+					})
 				}
 			})
 		}
