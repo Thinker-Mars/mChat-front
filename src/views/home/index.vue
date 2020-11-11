@@ -32,33 +32,51 @@ import {sendMsg} from "@/api/send";
 import {genRandomNum} from "@/utils/commonFun";
 import Vue from 'vue'
 export default {
+
 	name: "home",
+
+	components: { sideMenu, userProfile },
+
 	data() {
 		return {
 			tempUid: genRandomNum(6),
 			tid: undefined,
 			sendMsg: undefined,
-			msgArr: []
+			msgArr: [],
+			socket: undefined
 		}
 	},
-	components: { sideMenu, userProfile },
-	// 监听服务器推送消息
+
 	created() {
-		this.initRoom();
-		this.sockets.subscribe("receiveUserMsg", function(data) {
-			let {tid, msg} = data;
-			this.renderMsg(tid, msg, 2);
-		});
+		this.socket = this.$store.getters.socket;
+		this.initEvent();
 	},
+
 	methods: {
+		/**
+		 * 初始化监听事件
+		 */
+		initEvent() {
+			let that = this;
+			that.socket.subscribe("connect", function() {
+				that.initRoom();
+			}, that);
+			that.socket.subscribe("receiveUserMsg", function(data) {
+				let {tid, msg} = data;
+				that.renderMsg(tid, msg, 2);
+			}, that);
+		},
+
 		/**
 		 * 以UID作为room的key
 		 */
 		initRoom() {
-			const socketId = this.$socket.id;
+			let {io} = this.socket;
+			const socketId = io.id;
 			let data = { uid: this.tempUid, socketId };
-			this.$socket.emit("initUserRoom", data);
+			io.emit("initUserRoom", data);
 		},
+
 		/**
 		 * 发送消息
 		 */
@@ -66,16 +84,17 @@ export default {
 			if (!this.tid || !this.sendMsg) {
 				return;
 			}
+			let {io} = this.socket;
 			let data = {
 				uid: this.tempUid,
 				msg: this.sendMsg,
 				tid: this.tid
 			};
-			// sendMsg(data);
-			this.$socket.emit("sendMsgToUser", data);
+			io.emit("sendMsgToUser", data);
 			this.renderMsg(this.tempUid, data.msg, 1);
 			this.sendMsg = "";
 		},
+
 		/**
 		 * 将接收到的数据渲染至对话窗口
 		 * @param {Number} uid 发送此条消息的人的uid
@@ -92,6 +111,7 @@ export default {
 				_receive.scroll({top, behavior: "smooth"})
 			}, 0);
 		}
+
 	}
 }
 </script>
