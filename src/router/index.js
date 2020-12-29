@@ -13,8 +13,8 @@ Vue.use(VueRouter)
 	/** 主页 */
 	{
 		path: '/home',
-    name: 'home',
-    component: () => import("@/views/home/index")
+    name: 'new-home',
+    component: () => import("@/views/new-home/index")
 	}
 ]
 

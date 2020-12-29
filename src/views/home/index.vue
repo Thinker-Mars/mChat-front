@@ -48,8 +48,8 @@ export default {
 	},
 
 	created() {
-		this.socket = this.$store.getters.socket;
-		this.initEvent();
+		// this.socket = this.$store.getters.socket;
+		// this.initEvent();
 	},
 
 	methods: {
