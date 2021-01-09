@@ -1,5 +1,8 @@
 <template>
 	<div class="new-home">
+		<keep-alive include="chat,setting,idea">
+			<router-view></router-view>
+		</keep-alive>
 		<bottom-menu />
 		<user-profile />
 	</div>

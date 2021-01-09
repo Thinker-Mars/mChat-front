@@ -36,7 +36,7 @@ export default {
 					// that.$store.dispatch("socket/connect").then(() => {
 					// 	that.$router.push({path: "/home"});
 					// })
-					that.$router.push({path: "/home"});
+					that.$router.push({path: "/home/chat"});
 				}
 			})
 		}
