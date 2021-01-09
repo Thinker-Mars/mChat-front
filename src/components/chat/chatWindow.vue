@@ -33,18 +33,16 @@
 			</div>
 		</div>
 		<div class="enter-msg">
-			<chat-bar />
+			<div class="chatBar">
+				<emotion @chooseEmotion="chooseEmotion"/>
+			</div>
 			<div
 				ref="enterMsg"
 				class="msg-box"
 				id="msg-box"
 				contenteditable="true"
 				spellcheck="false"
-				v-text="msgText"
-				@click="rememberLastEditRange"
-				@input="handleInput"
-				@keydown.enter.prevent="sendMsg"
-			>
+				@keydown.enter.prevent="sendMsg">
 			</div>
 			<div class="send-box">
 				<span class="send-btn" @click="sendMsg">发送</span>
@@ -54,11 +52,11 @@
 </template>
 
 <script>
-import ChatBar from "./chatbar";
+import Emotion from "./emotion";
 export default {
 	name: "chatWindow",
 	components: {
-		ChatBar
+		Emotion
 	},
 	data() {
 		return {
@@ -73,20 +71,18 @@ export default {
 	},
 	methods: {
 
-		handleInput(e) {
-			this.msgText = e.target.innerText;
-		},
-
 		sendMsg() {
-			console.log(this.msgText)
+			console.log(this.$refs.enterMsg.innerHTML)
+			this.clearMsg();
 		},
 
-		rememberLastEditRange() {
-			console.log('调用')
-			let el = document.getElementById("msg-box");
-			let selection = window.getSelection();
-			selection.selectAllChildren(el);
-			selection.collapseToEnd();
+		clearMsg() {
+			this.$refs.enterMsg.innerHTML = "";
+		},
+
+		chooseEmotion(index, src) {
+			const imgElement = `<img src="${src}" width="24" height="24">`;
+			document.execCommand("insertHTML", false, imgElement);
 		}
 	}
 }
@@ -110,11 +106,11 @@ export default {
 		height: calc(100% - 166px);
 		overflow-y: auto;
 		padding-left: 20px;
-    padding-right: 20px;
+    	padding-right: 20px;
 		padding-bottom: 10px;
 		.receive-box {
 			margin-top: 2px;
-    	margin-bottom: 2px;
+    		margin-bottom: 2px;
 			.receive-msg-box {
 				.receiver-outter {
 					display: inline-block;
@@ -188,7 +184,7 @@ export default {
 			display: inline-block;
 			position: relative;
 			left: 11px;
-    	top: -2px;
+    		top: -2px;
 			border-top: 6px solid transparent;
 			border-bottom: 6px solid transparent;
 			border-left: 0 solid transparent;
@@ -198,7 +194,7 @@ export default {
 			content: "";
 			position: absolute;
 			top: -5px;
-    	left: 1px;
+    		left: 1px;
 			border-top: 5px solid transparent;
 			border-bottom: 5px solid transparent;
 			border-left: 0 solid transparent;
@@ -213,7 +209,7 @@ export default {
 			display: inline-block;
 			position: absolute;
 			left: -11px;
-    	top: 10px;
+    		top: 10px;
 			border-top: 6px solid transparent;
 			border-bottom: 6px solid transparent;
 			border-left: 6px solid #9eea6a;
@@ -223,7 +219,7 @@ export default {
 			content: "";
 			position: absolute;
 			top: -5px;
-    	left: -7px;
+    		left: -7px;
 			border-top: 5px solid transparent;
 			border-bottom: 5px solid transparent;
 			border-left: 5px solid #9eea6a;
@@ -241,6 +237,12 @@ export default {
 	.enter-msg {
 		height: 120px;
 		border-top: 1px solid #D0D0D0;
+		.chatBar {
+			height: 26px;
+			line-height: 26px;
+			padding-left: 18px;
+			padding-right: 18px;
+		}
 		.msg-box {
 			height: calc(100% - 54px);
 			overflow-y: auto;
