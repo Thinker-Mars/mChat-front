@@ -38,7 +38,7 @@ export default {
 			previewList: [
 				{
 					uid: 123456,
-					msg: "新年好新年好新年好新年好",
+					msg: "新年好",
 					timestamp: 1609571539942
 				},
 				{
@@ -122,21 +122,6 @@ export default {
 		 */
 		getProfile(uid) {
 
-		},
-		/**
-		 * 根据时间戳与策略返回预览的时间
-		 * @param {number} timestamp 时间戳
-		 */
-		tellTime(timestamp) {
-			let time = new Date(timestamp);
-			let year = (new Date()).getFullYear();
-			let month = time.getMonth() + 1;
-			let day = time.getDate();
-			let hour = time.getHours();
-			let minutes = time.getMinutes();
-			let currentTimestamp = (new Date()).getTime();
-			const oneDay = 86400000;
-			return hour + ":" + minutes;
 		},
 		/**
 		 * 点击[预览]，查看消息

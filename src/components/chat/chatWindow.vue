@@ -1,11 +1,36 @@
 <!-- 聊天窗口组件 -->
 <template>
 	<div class="chatWindow">
+		<!-- 聊天对象名称 -->
 		<div class="name-box">
 			<span class="name">Cone</span>
 		</div>
-		<div class="msg-info">
-			<div class="receive-box">
+		<div id="msg-info" class="msg-info">
+			<div v-for="(msg, index) in msgList" :class="msg.type === 1 ? 'receive-box' : 'sendout-box'" :key="index">
+				<!-- 消息时间 -->
+				<div class="time-box">
+					<span class="time">{{tellTime(msg.timestamp)}}</span>
+				</div>
+				<!-- 接受到的消息 -->
+				<div v-if="msg.type === 1" class="receive-msg-box">
+					<div class="chat-user-img">
+						<img src="@/assets/img/user/preview.jpg">
+					</div>
+					<div class="receiver-outter">
+						<div class="left-arrow"></div>
+						<span class="receive-msg" v-html="msg.content"></span>
+					</div>
+				</div>
+				<!-- 发送的消息 -->
+				<div v-else class="send-msg-box">
+					<span class="send-msg" v-html="msg.content"></span>
+					<div class="chat-user-img">
+						<div class="right-arrow"></div>
+						<img src="@/assets/img/user/cone.jpg">
+					</div>
+				</div>
+			</div>
+			<!-- <div class="receive-box">
 				<div class="time-box">
 					<span class="time">15:41</span>
 				</div>
@@ -18,24 +43,28 @@
 						<span class="receive-msg">新年快乐！</span>
 					</div>
 				</div>
-			</div>
-			<div class="sendout-box">
+			</div> -->
+			<!-- <div class="sendout-box">
 				<div class="time-box">
-					<span class="time">16:56</span>
+					<span class="time">10:38</span>
 				</div>
 				<div class="send-msg-box">
-					<span class="send-msg">新年快乐！</span>
+					<span class="send-msg">新年好</span>
 					<div class="chat-user-img">
 						<div class="right-arrow"></div>
 						<img src="@/assets/img/user/cone.jpg">
 					</div>
 				</div>
-			</div>
+			</div> -->
 		</div>
+		<!-- 消息编辑区 -->
 		<div class="enter-msg">
+			<!-- 辅助操作区 -->
 			<div class="chatBar">
+				<!-- 选择表情 -->
 				<emotion @chooseEmotion="chooseEmotion"/>
 			</div>
+			<!-- 输入消息 -->
 			<div
 				ref="enterMsg"
 				class="msg-box"
@@ -44,6 +73,7 @@
 				spellcheck="false"
 				@keydown.enter.prevent="sendMsg">
 			</div>
+			<!-- 发送消息 -->
 			<div class="send-box">
 				<span class="send-btn" @click="sendMsg">发送</span>
 			</div>
@@ -61,8 +91,18 @@ export default {
 	data() {
 		return {
 			uid: undefined,
-			msgText: "",
-			lastEditRange: undefined
+			msgList: [
+				{
+					type: 1,
+					content: "新年快乐！",
+					timestamp: 1609571539942
+				},
+				{
+					type: 2,
+					content: "新年好！",
+					timestamp: 1609571549942
+				}
+			]
 		}
 	},
 	created() {
@@ -70,20 +110,48 @@ export default {
 		this.uid = uid;
 	},
 	methods: {
-
+		/**
+		 * 发送消息
+		 */
 		sendMsg() {
-			console.log(this.$refs.enterMsg.innerHTML)
+			this.msgList.push({
+				type: 2,
+				content: this.$refs.enterMsg.innerHTML,
+				timestamp: (new Date()).getTime()
+			});
 			this.clearMsg();
+			this.toLatestMsg();
 		},
 
+		/**
+		 * 清空消息
+		 */
 		clearMsg() {
 			this.$refs.enterMsg.innerHTML = "";
 		},
 
+		/**
+		 * 选择表情
+		 * @param {number} index 表情的索引
+		 * @param {string} src 表情的地址
+		 */
 		chooseEmotion(index, src) {
+			document.getElementById("msg-box").focus();
 			const imgElement = `<img src="${src}" width="24" height="24">`;
 			document.execCommand("insertHTML", false, imgElement);
+		},
+
+		/**
+		 * 页面滚动至最新的那条消息
+		 */
+		toLatestMsg() {
+			let el = document.getElementById("msg-info");
+			setTimeout(function() {
+				let top = el.scrollHeight;
+				el.scroll({top, behavior: "smooth"})
+			});
 		}
+		
 	}
 }
 </script>
@@ -100,6 +168,7 @@ export default {
 			font-size: 20px;
 			padding-left: 20px;
 			color: #000000;
+			user-select: none;
 		}
 	}
 	.msg-info {
@@ -166,6 +235,7 @@ export default {
 				padding: 2px 4px;
 				color: #fff;
 				background-color: #D8D8D8;
+				user-select: none;
 			}
 		}
 		.chat-user-img {
@@ -173,6 +243,7 @@ export default {
 			width: 34px;
 			height: 34px;
 			position: relative;
+			user-select: none;
 			img {
 				width: 34px;
 				height: 34px;
