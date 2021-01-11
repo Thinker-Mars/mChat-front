@@ -13,7 +13,7 @@
 					<div class="msg-box">
 						<div class="top">
 							<span class="name">Cone</span>
-							<span class="time">{{tellTime(preview.timestamp)}}</span>
+							<span class="time">{{tellTime(preview.timestamp, 1)}}</span>
 						</div>
 						<div class="bottom">
 							{{preview.msg}}
@@ -39,7 +39,7 @@ export default {
 				{
 					uid: 123456,
 					msg: "新年好",
-					timestamp: 1609571539942
+					timestamp: 1610287509000
 				},
 				{
 					uid: 123456,

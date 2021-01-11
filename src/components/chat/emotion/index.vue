@@ -54,6 +54,7 @@ export default {
 		padding: 10px;
 		overflow-y: auto;
 		border: 1px solid #D0D0D0;
+		background-color: #F8F8F8;
 	}
 	.emotion-box::-webkit-scrollbar {
 		width: 8px;

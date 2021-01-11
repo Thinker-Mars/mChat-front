@@ -9,7 +9,7 @@
 			<div v-for="(msg, index) in msgList" :class="msg.type === 1 ? 'receive-box' : 'sendout-box'" :key="index">
 				<!-- 消息时间 -->
 				<div class="time-box">
-					<span class="time">{{tellTime(msg.timestamp)}}</span>
+					<span class="time">{{tellTime(msg.timestamp, 2)}}</span>
 				</div>
 				<!-- 接受到的消息 -->
 				<div v-if="msg.type === 1" class="receive-msg-box">
@@ -95,12 +95,12 @@ export default {
 				{
 					type: 1,
 					content: "新年快乐！",
-					timestamp: 1609571539942
+					timestamp: 1610201109000
 				},
 				{
 					type: 2,
 					content: "新年好！",
-					timestamp: 1609571549942
+					timestamp: 1610288109000
 				}
 			]
 		}
