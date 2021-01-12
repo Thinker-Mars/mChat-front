@@ -2,10 +2,10 @@
 	<div class="chat">
 		<div class="container">
 			<div class="left-preview">
-				<div v-for="(preview, index) in previewList"
-					:key="preview.timestamp"
+				<div v-for="(preview, index) in previewMsgList"
+					:key="index"
 					:class="selected == index ? 'preview active' : 'preview'"
-					@click="checkMsgDetail(index)"
+					@click="checkMsgDetail(index, preview.uid)"
 				>
 					<div class="img-box">
 						<img src="@/assets/img/user/preview.jpg">
@@ -15,9 +15,7 @@
 							<span class="name">Cone</span>
 							<span class="time">{{tellTime(preview.timestamp, 1)}}</span>
 						</div>
-						<div class="bottom">
-							{{preview.msg}}
-						</div>
+						<div class="bottom" v-html="preview.msg"></div>
 					</div>
 				</div>
 			</div>
@@ -31,74 +29,18 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 export default {
 	name: "chat",
 	data() {
 		return {
-			previewList: [
-				{
-					uid: 123456,
-					msg: "新年好",
-					timestamp: 1610287509000
-				},
-				{
-					uid: 123456,
-					msg: "你在干嘛呢",
-					timestamp: 1609571539943
-				},
-				{
-					uid: 123456,
-					msg: "吃过了吗？",
-					timestamp: 1609571539944
-				},
-				{
-					uid: 123456,
-					msg: "新年好",
-					timestamp: 1609571539945
-				},
-				{
-					uid: 123456,
-					msg: "新年好",
-					timestamp: 1609571539946
-				},
-				{
-					uid: 123456,
-					msg: "新年好",
-					timestamp: 1609571539947
-				},
-				{
-					uid: 123456,
-					msg: "新年好",
-					timestamp: 1609571539948
-				}, 
-				{
-					uid: 123456,
-					msg: "新年好",
-					timestamp: 1609571539949
-				},
-				{
-					uid: 123456,
-					msg: "新年好",
-					timestamp: 1609571539950
-				}, 
-				{
-					uid: 123456,
-					msg: "新年好",
-					timestamp: 1609571539951
-				},
-				{
-					uid: 123456,
-					msg: "新年好",
-					timestamp: 1609571539952
-				}, 
-				{
-					uid: 123456,
-					msg: "新年好",
-					timestamp: 1609571539953
-				}
-			], // 左侧预览消息数据
 			selected: undefined, // 当前选中预览窗口
 		}
+	},
+	computed: {
+		...mapGetters([
+			"previewMsgList"
+		])
 	},
 	methods: {
 		/**
@@ -126,23 +68,24 @@ export default {
 		/**
 		 * 点击[预览]，查看消息
 		 * @param {number} index 该条预览信息的索引
+		 * @param {number} uid 预览消息的发送者id
 		 */
-		checkMsgDetail(index) {
+		checkMsgDetail(index, uid) {
 			this.selected = index;
 			this.allowJump(index);
-			if (this.allowJump(index)) {
+			if (this.allowJump(uid)) {
 				// 查看消息
-				this.$router.push(`/home/chat/${index}`);
+				this.$router.push(`/home/chat/${uid}`);
 			}
 		},
 		/** 
 		 * 判断是否允许跳转
 		 * 避免重复跳转同一路由
-		 * @param {number} index 索引
+		 * @param {number} uid 用户id
 		 */
-		allowJump(index) {
+		allowJump(uid) {
 			const { path } = this.$route;
-			return path != `/home/chat/${index}`;
+			return path != `/home/chat/${uid}`;
 		}
 	}
 	

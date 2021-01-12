@@ -90,7 +90,7 @@ export default {
 	},
 	data() {
 		return {
-			uid: undefined,
+			friendUid: undefined,
 			msgList: [
 				{
 					type: 1,
@@ -107,20 +107,50 @@ export default {
 	},
 	created() {
 		const { uid } = this.$route.params;
-		this.uid = uid;
+		this.friendUid = Number(uid);
 	},
 	methods: {
 		/**
 		 * 发送消息
 		 */
 		sendMsg() {
-			this.msgList.push({
-				type: 2,
-				content: this.$refs.enterMsg.innerHTML,
-				timestamp: (new Date()).getTime()
-			});
+			const msg = this.$refs.enterMsg.innerHTML;
+			const timestamp = (new Date()).getTime();
+			if (!msg) {
+				return;
+			}
+			this.updateChatMsgList(msg, timestamp);
+			this.updatePreviewMsg(msg, timestamp);
 			this.clearMsg();
 			this.toLatestMsg();
+		},
+
+		/**
+		 * 向此聊天窗口新增一条消息
+		 * @param {} content 新的消息内容
+		 * @param {number} timestamp 消息产生时间(ms)
+		 */
+		updateChatMsgList(content, timestamp) {
+			const msg = {
+				type: 2,
+				content,
+				timestamp
+			};
+			this.msgList.push(msg);
+		},
+
+		/**
+		 * 更新预览消息的信息
+		 * @param {} msg 新的消息内容
+		 * @param {number} timestamp 消息产生时间(ms)
+		 */
+		updatePreviewMsg(msg, timestamp) {
+			const previewMsg = {
+				uid: this.friendUid,
+				msg,
+				timestamp
+			};
+			this.$store.dispatch("previewMsg/updateMsg", previewMsg);
 		},
 
 		/**
