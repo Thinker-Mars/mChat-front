@@ -13,6 +13,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import msgUrl from "@/assets/img/bottom-menu/msg.svg";
 import activeMsgUrl from "@/assets/img/bottom-menu/msg-active.svg";
 import ideaUrl from "@/assets/img/bottom-menu/idea.svg";
@@ -28,6 +29,12 @@ export default {
 			settingSrc: settingUrl
 		}
 	},
+	computed: {
+		...mapGetters([
+			"selected",
+			"currentUid"
+		])
+	},
 	methods: {
 		/**
 		 * 切换[消息页]状态
@@ -39,7 +46,15 @@ export default {
 				this.toggleIdea(false);
 				this.toggleSetting(false);
 				if (this.allowJump("chat")) {
-					this.$router.push("/home/chat");
+					if (this.selected !== undefined) {
+						// 存在已选中的聊天窗口，显示对应的聊天窗口
+						if (this.allowJump2ChatWindow(this.currentUid)) {
+							this.$router.push(`/home/chat/${this.currentUid}`);
+						}
+					} else {
+						// 当前没有选中的聊天窗口，展示[消息]页即可
+						this.$router.push("/home/chat");
+					}
 				}
 			} else {
 				this.msgSrc = msgUrl;
@@ -88,6 +103,15 @@ export default {
 		allowJump(target) {
 			const { name } = this.$route;
 			return name != target;
+		},
+		
+		/**
+		 * 判断是否允许跳转至聊天窗口路由
+		 * @param {number} uid 用户id
+		 */
+		allowJump2ChatWindow(uid) {
+			const { path } = this.$route;
+			return path != `/home/chat/${uid}`;
 		}
 	}
 }

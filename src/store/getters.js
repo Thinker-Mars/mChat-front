@@ -5,7 +5,11 @@ const getters = {
 	/** socket连接实例 */
 	socket: state => state.socket.socket,
 	/** 消息预览列表 */
-	previewMsgList: state => state.previewMsg.msgList
+	previewMsgList: state => state.previewMsg.msgList,
+	/** 当前选中预览窗口的索引 */
+	selected: state => state.previewMsg.selectedPreview,
+	/** 当前聊天对象的uid */
+	currentUid: state => state.previewMsg.currentUid
 }
 
 export default getters

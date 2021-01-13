@@ -151,6 +151,7 @@ export default {
 				timestamp
 			};
 			this.$store.dispatch("previewMsg/updateMsg", previewMsg);
+			this.$store.dispatch("previewMsg/updateSelected", 0);
 		},
 
 		/**
@@ -211,6 +212,7 @@ export default {
 			margin-top: 2px;
     		margin-bottom: 2px;
 			.receive-msg-box {
+				user-select: none;
 				.receiver-outter {
 					display: inline-block;
 					width: calc(100% - 34px);
@@ -235,6 +237,7 @@ export default {
 			margin-top: 10px;
 			.send-msg-box {
 				text-align: right;
+				user-select: none;
 				.send-msg {
 					display: inline-block;
 					padding: 6px;

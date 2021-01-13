@@ -34,12 +34,13 @@ export default {
 	name: "chat",
 	data() {
 		return {
-			selected: undefined, // 当前选中预览窗口
+			
 		}
 	},
 	computed: {
 		...mapGetters([
-			"previewMsgList"
+			"previewMsgList",
+			"selected"
 		])
 	},
 	methods: {
@@ -71,8 +72,10 @@ export default {
 		 * @param {number} uid 预览消息的发送者id
 		 */
 		checkMsgDetail(index, uid) {
-			this.selected = index;
-			this.allowJump(index);
+			// 更新当前选中窗口信息
+			this.$store.dispatch("previewMsg/updateSelected", index);
+			// 更新当前聊天对象uid
+			this.$store.dispatch("previewMsg/updateCurrentUid", uid);
 			if (this.allowJump(uid)) {
 				// 查看消息
 				this.$router.push(`/home/chat/${uid}`);
@@ -106,6 +109,7 @@ export default {
 		float: left;
 		overflow-y: auto;
 		border-right: 1px solid #E8E8E8;
+		user-select: none;
 		.preview {
 			position: relative;
 			height: 68px;
