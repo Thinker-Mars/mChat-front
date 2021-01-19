@@ -33,7 +33,7 @@ Vue.use(VueRouter)
 				children: [
 					/** 每一个聊天窗口 */
 					{
-						path: ":uid",
+						path: ":Uid",
 						name: "chatWindow",
 						component: () => import("@/components/chat/chatWindow"),
 						meta: {

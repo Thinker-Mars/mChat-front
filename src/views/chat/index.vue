@@ -5,7 +5,7 @@
 				<div v-for="(preview, index) in previewMsgList"
 					:key="index"
 					:class="selected == index ? 'preview active' : 'preview'"
-					@click="checkMsgDetail(index, preview.uid)"
+					@click="checkMsgDetail(index, preview.Uid)"
 				>
 					<div class="img-box">
 						<img src="@/assets/img/user/preview.jpg">
@@ -13,15 +13,15 @@
 					<div class="msg-box">
 						<div class="top">
 							<span class="name">Cone</span>
-							<span class="time">{{tellTime(preview.timestamp, 1)}}</span>
+							<span class="time">{{tellTime(preview.Timestamp, 1)}}</span>
 						</div>
-						<div class="bottom" v-html="preview.msg"></div>
+						<div class="bottom" v-html="preview.Msg"></div>
 					</div>
 				</div>
 			</div>
 			<div class="right-window">
 				<keep-alive include="chatWindow">
-					<router-view :key="$route.params.uid"></router-view>
+					<router-view :key="$route.params.Uid"></router-view>
 				</keep-alive>
 			</div>
 		</div>
@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters } from 'vuex';
 export default {
 	name: "chat",
 	data() {
@@ -46,10 +46,10 @@ export default {
 	methods: {
 		/**
 		 * 有信息到达，更新/新增[预览]窗口
-		 * @param {number} uid 用户的唯一ID
-		 * @param {string} msg 要展示的消息
+		 * @param {number} Uid 用户的唯一ID
+		 * @param {string} Msg 要展示的消息
 		 */
-		addPreview(uid, msg) {
+		addPreview(Uid, Msg) {
 
 		},
 		/**
@@ -61,34 +61,34 @@ export default {
 		},
 		/**
 		 * 获取用户的头像
-		 * @param {number} uid 用户的唯一ID
+		 * @param {number} Uid 用户的唯一ID
 		 */
-		getProfile(uid) {
+		getProfile(Uid) {
 
 		},
 		/**
 		 * 点击[预览]，查看消息
 		 * @param {number} index 该条预览信息的索引
-		 * @param {number} uid 预览消息的发送者id
+		 * @param {number} Uid 预览消息的发送者id
 		 */
-		checkMsgDetail(index, uid) {
+		checkMsgDetail(index, Uid) {
 			// 更新当前选中窗口信息
 			this.$store.dispatch("previewMsg/updateSelected", index);
 			// 更新当前聊天对象uid
-			this.$store.dispatch("previewMsg/updateCurrentUid", uid);
-			if (this.allowJump(uid)) {
+			this.$store.dispatch("previewMsg/updateCurrentUid", Uid);
+			if (this.allowJump(Uid)) {
 				// 查看消息
-				this.$router.push(`/home/chat/${uid}`);
+				this.$router.push(`/home/chat/${Uid}`);
 			}
 		},
 		/** 
 		 * 判断是否允许跳转
 		 * 避免重复跳转同一路由
-		 * @param {number} uid 用户id
+		 * @param {number} Uid 用户id
 		 */
-		allowJump(uid) {
+		allowJump(Uid) {
 			const { path } = this.$route;
-			return path != `/home/chat/${uid}`;
+			return path != `/home/chat/${Uid}`;
 		}
 	}
 	

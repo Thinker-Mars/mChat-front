@@ -16,10 +16,6 @@ Vue.config.productionTip = false;
 
 Vue.prototype.tellTime = tellTime;
 
-// 建立socket连接，返回socket连接地址
-// 登录成功后，Redis中写入获取的UID
-
-// 获取服务这个接口后续计划由网关提供
 new Vue({
 	router,
 	store,

@@ -6,24 +6,24 @@
 			<span class="name">Cone</span>
 		</div>
 		<div id="msg-info" class="msg-info">
-			<div v-for="(msg, index) in msgList" :class="msg.type === 1 ? 'receive-box' : 'sendout-box'" :key="index">
+			<div v-for="(msg, index) in msgList" :class="msg.Type === 1 ? 'receive-box' : 'sendout-box'" :key="index">
 				<!-- 消息时间 -->
 				<div class="time-box">
-					<span class="time">{{tellTime(msg.timestamp, 2)}}</span>
+					<span class="time">{{tellTime(msg.Timestamp, 2)}}</span>
 				</div>
 				<!-- 接受到的消息 -->
-				<div v-if="msg.type === 1" class="receive-msg-box">
+				<div v-if="msg.Type === 1" class="receive-msg-box">
 					<div class="chat-user-img">
 						<img src="@/assets/img/user/preview.jpg">
 					</div>
 					<div class="receiver-outter">
 						<div class="left-arrow"></div>
-						<span class="receive-msg" v-html="msg.content"></span>
+						<span class="receive-msg" v-html="msg.Content"></span>
 					</div>
 				</div>
 				<!-- 发送的消息 -->
 				<div v-else class="send-msg-box">
-					<span class="send-msg" v-html="msg.content"></span>
+					<span class="send-msg" v-html="msg.Content"></span>
 					<div class="chat-user-img">
 						<div class="right-arrow"></div>
 						<img src="@/assets/img/user/cone.jpg">
@@ -83,6 +83,8 @@
 
 <script>
 import Emotion from "./emotion";
+import { mapGetters } from 'vuex';
+import { existTable, createChatTable, addRecord } from "@/utils/db/dbUtil";
 export default {
 	name: "chatWindow",
 	components: {
@@ -90,26 +92,40 @@ export default {
 	},
 	data() {
 		return {
-			friendUid: undefined,
+			friendUid: undefined, // 聊天对象的id
+			chatTableName: undefined, // 聊天数据数据存储的表名称
 			msgList: [
 				{
-					type: 1,
-					content: "新年快乐！",
-					timestamp: 1610201109000
+					Type: 1,
+					Content: "新年快乐！",
+					Timestamp: 1610201109000
 				},
 				{
-					type: 2,
-					content: "新年好！",
-					timestamp: 1610288109000
+					Type: 2,
+					Content: "新年好！",
+					Timestamp: 1610288109000
 				}
 			]
 		}
 	},
+	computed: {
+		...mapGetters([
+			"db"
+		])
+	},
 	created() {
-		const { uid } = this.$route.params;
-		this.friendUid = Number(uid);
+		this.initData();
+		this.checkTableBeforeChat();
 	},
 	methods: {
+		/**
+		 * 初始化聊天组件基本数据
+		 */
+		initData() {
+			const { Uid } = this.$route.params;
+			this.friendUid = Number(Uid);
+			this.chatTableName = `${this.friendUid}-chat`;
+		},
 		/**
 		 * 发送消息
 		 */
@@ -119,36 +135,58 @@ export default {
 			if (!msg) {
 				return;
 			}
+			// 本地存储消息
+			this.storageData(this.db, this.chatTableName, msg, timestamp);
+			// 更新页面聊天数据
 			this.updateChatMsgList(msg, timestamp);
+			// 更新左侧预览列表数据
 			this.updatePreviewMsg(msg, timestamp);
+			// 清空输入框
 			this.clearMsg();
+			// 页面滚动至最新的那条信息的位置
 			this.toLatestMsg();
 		},
 
 		/**
-		 * 向此聊天窗口新增一条消息
-		 * @param {} content 新的消息内容
+		 * 本地保存用户发送的消息
+		 * @param {IDBDatabase} db
+		 * @param {string} tableName 存储消息的数据表名称
+		 * @param {string} msg 消息
 		 * @param {number} timestamp 消息产生时间(ms)
 		 */
-		updateChatMsgList(content, timestamp) {
+		storageData(db, tableName, msg, timestamp) {
+			const data = {
+				Type: 2,
+				Content: msg,
+				Timestamp: timestamp
+			};
+			addRecord(db, tableName, data);
+		},
+
+		/**
+		 * 向此聊天窗口新增一条消息
+		 * @param {} Content 新的消息内容
+		 * @param {number} Timestamp 消息产生时间(ms)
+		 */
+		updateChatMsgList(Content, Timestamp) {
 			const msg = {
-				type: 2,
-				content,
-				timestamp
+				Type: 2,
+				Content,
+				Timestamp
 			};
 			this.msgList.push(msg);
 		},
 
 		/**
 		 * 更新预览消息的信息
-		 * @param {} msg 新的消息内容
-		 * @param {number} timestamp 消息产生时间(ms)
+		 * @param {} Msg 新的消息内容
+		 * @param {number} Timestamp 消息产生时间(ms)
 		 */
-		updatePreviewMsg(msg, timestamp) {
+		updatePreviewMsg(Msg, Timestamp) {
 			const previewMsg = {
-				uid: this.friendUid,
-				msg,
-				timestamp
+				Uid: this.friendUid,
+				Msg,
+				Timestamp
 			};
 			this.$store.dispatch("previewMsg/updateMsg", previewMsg);
 			this.$store.dispatch("previewMsg/updateSelected", 0);
@@ -181,8 +219,27 @@ export default {
 				let top = el.scrollHeight;
 				el.scroll({top, behavior: "smooth"})
 			});
+		},
+
+		/**
+		 * 判断是否存在聊天的数据表
+		 * 没有则新建
+		 */
+		checkTableBeforeChat() {
+			const currentDB = this.db;
+			const uid = this.friendUid;
+			const tableName = `${uid}-chat`;
+			if (!existTable(tableName, currentDB)) {
+				// 需要先关闭数据库连接，否则无法触发后续数据库升级事件
+				currentDB.close();
+				const currentVersion = currentDB.version;
+				createChatTable(currentVersion, uid).then(
+					db => {
+						this.$store.dispatch("app/setDB", db);
+					}
+				)
+			}
 		}
-		
 	}
 }
 </script>
@@ -226,6 +283,7 @@ export default {
 						color: #080808;
 						border-radius: 4px;
 						max-width: 50%;
+						word-wrap: break-word;
 					}
 					.receive-msg:hover {
 						background-color: #f6f6f6;
@@ -249,6 +307,7 @@ export default {
 					margin-right: 10px;
 					text-align: left;
 					background-color: #9eea6a;
+					word-wrap: break-word;
 				}
 				.send-msg:hover {
 					background-color: #98e165;

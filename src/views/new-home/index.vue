@@ -11,11 +11,36 @@
 <script>
 import BottomMenu from "./bottom-menu";
 import UserProfile from "./user-profile";
+import { initDB } from "@/utils/db/dbUtil";
 export default {
 	name: "new-home",
 	components: {
 		BottomMenu,
 		UserProfile
+	},
+	created() {
+		initDB().then(
+			db => {
+				this.$store.dispatch("app/setDB", db);
+			}
+		);
+		this.loginNotice();
+	},
+	methods: {
+		/**
+		 * 登录提示
+		 */
+		loginNotice() {
+			const myNotification = new Notification(
+				"mChat",
+				{
+					body: "hi，Cone，晚上好"
+				}
+			);
+			myNotification.onclick = function() {
+				myNotification.close();
+			}
+		}
 	}
 }
 </script>

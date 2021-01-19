@@ -17,5 +17,17 @@ export const TABLE_LIST = {
 	/**
 	 * 记录系统配置
 	 */
-	APP: "app"
+	// App: "app",
+	/**
+	 * 记录个人信息
+	 */
+	UserInfo: "userinfo",
+	/**
+	 * 记录好友的信息
+	 */
+	FriendInfo: "friendinfo",
+	/**
+	 * [消息页]左侧-预览消息列表信息
+	 */
+	PreviewList: "previewlist"
 }
