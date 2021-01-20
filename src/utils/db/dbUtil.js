@@ -7,17 +7,12 @@ import Tables from "@/utils/db/pojo/index";
  * @param {string} dbName 数据库名称
  * @param {number} version 数据库版本
  */
-function getDB(dbName, version) {
+export function getDB(dbName, version) {
 	return new Promise(function(resolve, reject) {
 		let request = window.indexedDB.open(dbName, version);
 		request.onsuccess = function(e) {
 			const db = e.target.result;
 			resolve(db);
-		}
-		// 初始化数据库
-		request.onupgradeneeded = function(e) {
-			const db = e.target.result;
-			initDB(db);
 		}
 	})
 }
@@ -94,6 +89,55 @@ export function addRecord(db, tableName, data) {
 				code: 0,
 				msg: e.target.error
 			})
+		}
+	})
+}
+
+/**
+ * 获取某张表中的数据量
+ * @param {IDBDatabase} db 
+ * @param {string} tableName 
+ */
+export function countTableMsg(db, tableName) {
+	return new Promise(function(resolve, reject) {
+		let request = db.transaction(tableName, "readonly")
+		.objectStore(tableName)
+		.count();
+		request.onsuccess = function(e) {
+			resolve({
+				code: 1000,
+				data: e.target.result
+			});
+		}
+	})
+}
+
+/**
+ * 
+ * @param {IDBDatabase} db 
+ * @param {string} tableName 
+ * @param {number} upper 
+ * @param {number} count 
+ */
+export function getHisMsg(db, tableName, upper, count = 20) {
+	return new Promise(function(resolve, reject) {
+		const lower = (upper - count) > 0 ? (start - count) : 0;
+		const keyRange = IDBKeyRange.bound(lower, upper);
+		let records = [];
+		let request = db.transaction(tableName, "readonly")
+		.objectStore(tableName)
+		.openCursor(keyRange);
+		request.onsuccess = function(e) {
+			let cursor = e.target.result;
+			if (cursor) {
+				records.push(cursor.value);
+				cursor.continue();
+			} else {
+				resolve({
+					code: 1000,
+					data: records
+				})
+			}
 		}
 	})
 }

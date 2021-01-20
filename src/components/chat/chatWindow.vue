@@ -84,7 +84,13 @@
 <script>
 import Emotion from "./emotion";
 import { mapGetters } from 'vuex';
-import { existTable, createChatTable, addRecord } from "@/utils/db/dbUtil";
+import {
+	existTable,
+	createChatTable,
+	addRecord,
+	countTableMsg,
+	getHisMsg
+} from "@/utils/db/dbUtil";
 export default {
 	name: "chatWindow",
 	components: {
@@ -94,6 +100,7 @@ export default {
 		return {
 			friendUid: undefined, // 聊天对象的id
 			chatTableName: undefined, // 聊天数据数据存储的表名称
+			msgCount: 0, // 数据总量(查询历史记录需要)
 			msgList: [
 				{
 					Type: 1,
@@ -126,6 +133,7 @@ export default {
 			this.friendUid = Number(Uid);
 			this.chatTableName = `${this.friendUid}-chat`;
 		},
+
 		/**
 		 * 发送消息
 		 */
@@ -160,7 +168,21 @@ export default {
 				Content: msg,
 				Timestamp: timestamp
 			};
-			addRecord(db, tableName, data);
+			addRecord(db, tableName, data).then(
+				() => {
+					this.updateCount();
+					const upper = this.msgCount;
+					getHisMsg(db, tableName, upper).then(
+						(res) => {
+							console.log(res.data);
+						}
+					);
+				}
+			);
+		},
+
+		updateCount() {
+			this.msgCount += 1;
 		},
 
 		/**
@@ -230,12 +252,19 @@ export default {
 			const uid = this.friendUid;
 			const tableName = `${uid}-chat`;
 			if (!existTable(tableName, currentDB)) {
-				// 需要先关闭数据库连接，否则无法触发后续数据库升级事件
+				// 表不存在，新建数据表
 				currentDB.close();
 				const currentVersion = currentDB.version;
 				createChatTable(currentVersion, uid).then(
-					db => {
+					(db) => {
 						this.$store.dispatch("app/setDB", db);
+					}
+				);
+			} else {
+				// 表已存在，获取当前表中数据量
+				countTableMsg(currentDB, tableName).then(
+					(res) => {
+						this.msgCount = res.data;
 					}
 				)
 			}
