@@ -7,6 +7,9 @@
 					:class="selected == index ? 'preview active' : 'preview'"
 					@click="checkMsgDetail(index, preview.Uid)"
 				>
+					<div class="unreadmsg" v-show="preview.UnReadMsgCount > 0">
+						{{preview.UnReadMsgCount}}
+					</div>
 					<div class="img-box">
 						<img src="@/assets/img/user/preview.jpg">
 					</div>
@@ -76,6 +79,8 @@ export default {
 			this.$store.dispatch("previewMsg/updateSelected", index);
 			// 更新当前聊天对象uid
 			this.$store.dispatch("previewMsg/updateCurrentUid", Uid);
+			// 清除未读消息(如果有的话)
+			this.$store.dispatch("previewMsg/confirmMsg", Uid);
 			if (this.allowJump(Uid)) {
 				// 查看消息
 				this.$router.push(`/home/chat/${Uid}`);
@@ -176,6 +181,18 @@ export default {
 		width: calc(100% - 236px);
 		height: 100%;
 		float: right;
+	}
+	.unreadmsg {
+		position: absolute;
+		min-width: 16px;
+    min-height: 16px;
+    line-height: 16px;
+    text-align: center;
+    border-radius: 50%;
+    background-color: red;
+    color: #fff;
+		left: 52px;
+    top: 4px;
 	}
 }
 </style>
