@@ -1,3 +1,4 @@
+import router from "@/router";
 const state = {
 	/**
 	 * 预览消息，entry格式如下：
@@ -127,19 +128,52 @@ const mutations = {
 	/**
 	 * 根据uid删除匹配的预览消息
 	 * @param {*} state 
-	 * @param {*} Uid 要删除消息的uid
+	 * @param {number} Uid 要删除消息的uid
 	 */
 	DELETE_MSG: (state, Uid) => {
 		let { msgList } = state;
 		for (let i = 0; i < msgList.length; i++) {
 			if (msgList[i].Uid === Uid) {
 				msgList.splice(i, 1);
+				if (state.selectedPreview !== undefined) {
+					// 已有选中的窗口，如果当前删除的窗口在已选中窗口之上，那么激活窗口位置减一，恰好相同则表示删除当前激活窗口，之下不用管
+					if (i < state.selectedPreview) {
+						state.selectedPreview -= 1;
+					} else if (i === state.selectedPreview) {
+						state.selectedPreview = undefined;
+						router.push("/home/chat");
+					}
+					
+				}
 				break;
 			}
 		}
 	},
 	/**
-	 * 更新当前选中的预览窗口
+	 * 置顶预览消息
+	 * @param {*} state 
+	 * @param {number} Uid 要置顶的消息的uid
+	 */
+	PLACED_TOP_MSG: (state, Uid) => {
+		let { msgList } = state;
+		for (let i = 0; i < msgList.length; i++) {
+			if (msgList[i].Uid === Uid) {
+				let copyMsg = msgList.splice(i, 1);
+				msgList.unshift(copyMsg[0]);
+				if (state.selectedPreview !== undefined) {
+					// 已有选中的窗口，如果想要置顶的窗口在已选中窗口之上，则不用管，恰好相同则置为0，之下则加一
+					if (i > state.selectedPreview) {
+						state.selectedPreview += 1;
+					} else if (i === state.selectedPreview) {
+						state.selectedPreview = 0;
+					}
+				}
+				break;
+			}
+		}
+	},
+	/**
+	 * 更新当前选中的窗口
 	 * @param {*} state 
 	 * @param {number} index 当前选中预览窗口的索引
 	 */
@@ -185,6 +219,9 @@ const actions = {
 	},
 	deleteMsg({ commit }, Uid) {
 		commit("DELETE_MSG", Uid);
+	},
+	placedTopMsg({ commit }, Uid) {
+		commit("PLACED_TOP_MSG", Uid);
 	},
 	updateSelected({ commit }, index) {
 		commit("UPDATE_SELECTED", index);

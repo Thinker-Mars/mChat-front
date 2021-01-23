@@ -121,7 +121,7 @@ export function countTableMsg(db, tableName) {
  */
 export function getHisMsg(db, tableName, upper, count = 20) {
 	return new Promise(function(resolve, reject) {
-		const lower = (upper - count) > 0 ? (start - count) : 0;
+		const lower = (upper - count) > 0 ? (upper - count) : 0;
 		const keyRange = IDBKeyRange.bound(lower, upper);
 		let records = [];
 		let request = db.transaction(tableName, "readonly")

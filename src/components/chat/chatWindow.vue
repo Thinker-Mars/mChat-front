@@ -168,17 +168,7 @@ export default {
 				Content: msg,
 				Timestamp: timestamp
 			};
-			addRecord(db, tableName, data).then(
-				() => {
-					this.updateCount();
-					const upper = this.msgCount;
-					getHisMsg(db, tableName, upper).then(
-						(res) => {
-							console.log(res.data);
-						}
-					);
-				}
-			);
+			addRecord(db, tableName, data);
 		},
 
 		updateCount() {
