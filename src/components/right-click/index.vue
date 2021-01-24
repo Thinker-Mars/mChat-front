@@ -1,5 +1,5 @@
 <template>
-    <div class="right-click" v-show="showCommand" :style="`left: ${left}px; top: ${top}px;`">
+    <div class="right-click" v-show="showCommand" :style="`left: ${left}px; top: ${top}px; width: ${width}px`">
         <ul>
             <li v-for="(command, index) in commandList" :key="index" @click="execCommand(command)">
                 {{command.name}}
@@ -15,7 +15,8 @@ export default {
         return {
             showCommand: false,
             left: 0,
-            top: 0
+            top: 0,
+            width: 0
         }
     },
     props: {
@@ -29,10 +30,12 @@ export default {
          * 打开右键菜单
          * @param {number} left 菜单左侧偏移
          * @param {number} top 菜单顶部偏移
+         * @param {number} width 菜单宽度
          */
-        open(left, top) {
+        open(left, top, width = 110) {
             this.left = left;
             this.top = top;
+            this.width = width;
             this.showCommand = true;
         },
         /**

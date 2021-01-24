@@ -44,7 +44,7 @@ export default {
 			/** 右键菜单命令配置 */
 			rightClickCommand: [
 				{
-					name: "置定",
+					name: "置顶",
 					commandKey: "placedTop"
 				},
 				{
@@ -66,14 +66,6 @@ export default {
 	},
 	methods: {
 		/**
-		 * 有信息到达，更新/新增[预览]窗口
-		 * @param {number} Uid 用户的唯一ID
-		 * @param {string} Msg 要展示的消息
-		 */
-		addPreview(Uid, Msg) {
-
-		},
-		/**
 		 * 删除某预览窗口
 		 * @param {number} Uid 用户唯一id
 		 */
@@ -86,13 +78,6 @@ export default {
 		 */
 		placedTopPreview(Uid) {
 			this.$store.dispatch("previewMsg/placedTopMsg", Uid);
-		},
-		/**
-		 * 获取用户的头像
-		 * @param {number} Uid 用户的唯一ID
-		 */
-		getProfile(Uid) {
-
 		},
 		/**
 		 * 点击[预览]，查看消息
@@ -120,6 +105,9 @@ export default {
 			const { path } = this.$route;
 			return path != `/home/chat/${Uid}`;
 		},
+		/*
+		 * 打开右键菜单
+		 */
 		rightClick(e) {
 			const { pageX, pageY } = e;
 			this.$refs.rightClick.open(pageX, pageY);
@@ -143,7 +131,7 @@ export default {
 		},
 		/**
 		 * 临时记录hover的预览消息
-		 * 辅助右键菜单功能
+		 * 辅助右键菜单的功能
 		 * @param previewMsg hover选中的预览消息内容
 		 */
 		recordPreviewMsg(previewMsg) {
@@ -242,14 +230,14 @@ export default {
 	.unreadmsg {
 		position: absolute;
 		min-width: 16px;
-    min-height: 16px;
-    line-height: 16px;
-    text-align: center;
-    border-radius: 50%;
-    background-color: red;
-    color: #fff;
+		min-height: 16px;
+		line-height: 16px;
+		text-align: center;
+		border-radius: 50%;
+		background-color: #fa5151;
+		color: #fff;
 		left: 52px;
-    top: 4px;
+		top: 4px;
 	}
 }
 </style>

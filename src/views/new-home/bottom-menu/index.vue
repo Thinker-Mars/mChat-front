@@ -1,6 +1,7 @@
 <template>
 	<div class="bottom-menu">
 		<div class="icon-container" @click="toggleMsg(true)">
+			<div class="unreadmsg" v-show="totalUnreadMsgCount > 0">{{totalUnreadMsgCount}}</div>
 			<img :src="msgSrc" class="bottom-menu-icon" data-msg="消息">
 		</div>
 		<div class="icon-container" @click="toggleIdea(true)">
@@ -13,7 +14,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters } from 'vuex';
 import msgUrl from "@/assets/img/bottom-menu/msg.svg";
 import activeMsgUrl from "@/assets/img/bottom-menu/msg-active.svg";
 import ideaUrl from "@/assets/img/bottom-menu/idea.svg";
@@ -32,7 +33,8 @@ export default {
 	computed: {
 		...mapGetters([
 			"selected",
-			"currentUid"
+			"currentUid",
+			"totalUnreadMsgCount"
 		])
 	},
 	methods: {
@@ -132,6 +134,7 @@ export default {
 	margin-right: 100px;
 	display: inline-block;
 	cursor: pointer;
+	position: relative;
 }
 .bottom-menu-icon {
 	width: 25px;
@@ -139,5 +142,17 @@ export default {
 }
 .icon-container:last-child {
 	margin-right: 0;
+}
+.unreadmsg {
+	position: absolute;
+	min-width: 16px;
+	min-height: 16px;
+	line-height: 16px;
+	text-align: center;
+	border-radius: 50%;
+	background-color: #fa5151;
+	color: #fff;
+	left: 12px;
+	top: 10px;
 }
 </style>

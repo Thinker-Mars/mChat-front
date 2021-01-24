@@ -9,7 +9,9 @@ const getters = {
 	/** 当前选中预览窗口的索引 */
 	selected: state => state.previewMsg.selectedPreview,
 	/** 当前聊天对象的uid */
-	currentUid: state => state.previewMsg.currentUid
+	currentUid: state => state.previewMsg.currentUid,
+	/** 预览列表未读消息总数 */
+	totalUnreadMsgCount: state => state.previewMsg.totalUnreadMsgCount
 }
 
 export default getters

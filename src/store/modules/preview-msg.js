@@ -19,7 +19,7 @@ const state = {
 		{
 			Uid: 2,
 			Msg: "你在干嘛呢",
-			UnReadMsgCount: 0,
+			UnReadMsgCount: 1,
 			Timestamp: 1609571539943
 		},
 		{
@@ -90,7 +90,11 @@ const state = {
 	/**
 	 * 当前聊天对象的uid
 	 */
-	currentUid: undefined
+	currentUid: undefined,
+	/**
+	 * 预览列表未读消息总数
+	 */
+	totalUnreadMsgCount: 5
 };
 
 const mutations = {
@@ -110,6 +114,22 @@ const mutations = {
 				msgList.splice(i, 1);
 				msgList.unshift({ Uid, Msg, Timestamp });
 				state.selectedPreview = 0;
+				break;
+			}
+		}
+	},
+	/**
+	 * 修改预览消息内容
+	 * 删除聊天触发此操作
+	 * @param {*} state 
+	 * @param {object} newMsg 新消息
+	 */
+	CHANGE_MSG: (state, newMsg) => {
+		let { msgList } = state;
+		for (let i = 0; i < msgList.length; i++) {
+			if (msgList[i].Uid === newMsg.Uid) {
+				msgList[i].Msg = newMsg.Msg;
+				msgList[i].Timestamp = newMsg.Timestamp;
 				break;
 			}
 		}
@@ -202,8 +222,10 @@ const mutations = {
 	CONFIRM_MSG: (state, Uid) => {
 		let { msgList } = state;
 		for (let i = 0; i < msgList.length; i++) {
-			if (msgList[i].Uid === Uid) {
-				(msgList[i].UnReadMsgCount !== 0) && (msgList[i].UnReadMsgCount = 0);
+			if (msgList[i].Uid === Uid && msgList[i].UnReadMsgCount !== 0) {
+				const msgCount = msgList[i].UnReadMsgCount;
+				msgList[i].UnReadMsgCount = 0;
+				state.totalUnreadMsgCount -= msgCount;
 			}
 		}
 	}
@@ -231,6 +253,9 @@ const actions = {
 	},
 	confirmMsg({ commit }, Uid) {
 		commit("CONFIRM_MSG", Uid);
+	},
+	changeMsg({ commit }, msg) {
+		commit("CHANGE_MSG", msg);
 	}
 }
 

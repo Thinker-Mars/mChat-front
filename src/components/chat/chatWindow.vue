@@ -18,12 +18,24 @@
 					</div>
 					<div class="receiver-outter">
 						<div class="left-arrow"></div>
-						<span class="receive-msg" v-html="msg.Content"></span>
+						<span
+							class="receive-msg"
+							v-html="msg.Content"
+							@contextmenu="rightClick"
+							@mouseenter="recordMsg(msg)"
+						>
+						</span>
 					</div>
 				</div>
 				<!-- 发送的消息 -->
 				<div v-else class="send-msg-box">
-					<span class="send-msg" v-html="msg.Content"></span>
+					<span
+						class="send-msg"
+						v-html="msg.Content"
+						@contextmenu="rightClick"
+						@mouseenter="recordMsg(msg)"
+					>
+					</span>
 					<div class="chat-user-img">
 						<div class="right-arrow"></div>
 						<img src="@/assets/img/user/cone.jpg">
@@ -78,29 +90,43 @@
 				<span class="send-btn" @click="sendMsg">发送</span>
 			</div>
 		</div>
+		<right-click ref="rightClick" :commandList="rightClickCommand" @handleExecCommand="handleExecCommand"/>
 	</div>
 </template>
 
 <script>
-import Emotion from "./emotion";
+import Emotion from "@/components/chat/emotion";
+import RightClick from "@/components/right-click";
 import { mapGetters } from 'vuex';
 import {
 	existTable,
 	createChatTable,
 	addRecord,
 	countTableMsg,
-	getHisMsg
+	getHisMsg,
+	deleteDBRecord
 } from "@/utils/db/dbUtil";
 export default {
 	name: "chatWindow",
 	components: {
-		Emotion
+		Emotion, RightClick
 	},
 	data() {
 		return {
 			friendUid: undefined, // 聊天对象的id
 			chatTableName: undefined, // 聊天数据数据存储的表名称
 			msgCount: 0, // 数据总量(查询历史记录需要)
+			tempMsg: {}, // hover的消息(辅助右键菜单)
+			rightClickCommand: [
+				{
+					name: "转发",
+					commandKey: "forwardMsg"
+				},
+				{
+					name: "删除",
+					commandKey: "deleteMsg"
+				}
+			], // 右键菜单命令配置
 			msgList: [
 				{
 					Type: 1,
@@ -258,7 +284,65 @@ export default {
 					}
 				)
 			}
-		}
+		},
+		/**
+		 * 打开右键菜单
+		 */
+		rightClick(e) {
+			const { pageX, pageY } = e;
+			this.$refs.rightClick.open(pageX, pageY, 64);
+			e.preventDefault();
+		},
+		/**
+		 * 记录hover时的消息
+		 * 辅助右键菜单的功能
+		 * @param msg hover选中的消息
+		 */
+		recordMsg(msg) {
+			if (this.tempMsg.Type + this.tempMsg.Timestamp !== msg.Type + msg.Timestamp) {
+				this.tempMsg = msg;
+			}
+		},
+		/**
+		 * 处理右键菜单的事件
+		 * @param {string} commandKey 要执行的命令
+		 */
+		handleExecCommand(commandKey) {
+			if (commandKey && this.tempMsg) {
+				if (commandKey === "forwardMsg") {
+					// 暂未实现
+				}
+				if (commandKey === "deleteMsg") {
+					this.deleteMsg(this.tempMsg);
+				}
+			}
+		},
+		/**
+		 * 删除指定的聊天记录
+		 * @param {object} msg 要删除的消息
+		 */
+		deleteMsg(msg) {
+			const { Timestamp } = msg;
+			const currentDB = this.db;
+			const tableName = `${this.friendUid}-chat`;
+			for (let i = 0; i < this.msgList.length; i++) {
+				if (this.msgList[i].Type === msg.Type && this.msgList[i].Timestamp === msg.Timestamp) {
+					if (i === this.msgList.length - 1 && this.msgList.length > 1) {
+						// 删除的是页面最后一条记录，删除后，需要更新左侧预览消息内容为上一条消息
+						const newPreviewMsg = {
+							Uid: this.friendUid,
+							Msg: this.msgList[i - 1].Content,
+							Timestamp: this.msgList[i - 1].Timestamp
+						};
+						this.$store.dispatch("previewMsg/changeMsg", newPreviewMsg);
+					}
+					this.msgList.splice(i, 1);
+					break;
+				}
+			}
+			deleteDBRecord(currentDB, tableName, Timestamp);
+		},
+
 	}
 }
 </script>
