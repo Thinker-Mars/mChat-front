@@ -113,7 +113,6 @@ const mutations = {
 				const { Uid, Msg, Timestamp } = previewMsg;
 				msgList.splice(i, 1);
 				msgList.unshift({ Uid, Msg, Timestamp });
-				state.selectedPreview = 0;
 				break;
 			}
 		}
@@ -143,7 +142,6 @@ const mutations = {
 		let { msgList } = state;
 		const { Uid, Msg, Timestamp } = previewMsg;
 		msgList.unshift({ Uid, Msg, Timestamp });
-		state.selectedPreview = 0;
 	},
 	/**
 	 * 根据uid删除匹配的预览消息
@@ -228,34 +226,78 @@ const mutations = {
 				state.totalUnreadMsgCount -= msgCount;
 			}
 		}
+	},
+	/**
+	 * 接收到新消息
+	 * 判断消息预览窗口是否已存在，已存在则执行[更新]操作，没有则新建一个预览窗口
+	 */
+	RECEIVE_MSG: (state, newMsg) => {
+		const { Uid, Msg, Timestamp } = newMsg;
+		let { msgList } = state;
+		for (let i = 0; i < msgList.length; i++) {
+			// 更新消息
+			if (msgList[i].Uid === Uid) {
+				msgList[i].Msg = newMsg.Msg;
+				msgList[i].Timestamp = newMsg.Timestamp;
+				return;
+			}
+		}
+		// 新建一个预览窗口
+		msgList.unshift({ Uid, Msg, Timestamp });
 	}
 }
 
 const actions = {
+	/**
+	 * 更新左侧消息预览列表的数据
+	 * 已有预览消息，只更新
+	 */
 	updateMsg({ commit }, previewMsg) {
 		commit("UPDATE_MSG", previewMsg);
 	},
-	addMsg({ commit }, previewMsg) {
-		commit("ADD_MSG", previewMsg);
-		commit("UPDATE_CURRENTUID", previewMsg.Uid);
-	},
+	/**
+	 * 删除预览消息
+	 */
 	deleteMsg({ commit }, Uid) {
 		commit("DELETE_MSG", Uid);
 	},
+	/**
+	 * 右键菜单-消息置顶
+	 */
 	placedTopMsg({ commit }, Uid) {
 		commit("PLACED_TOP_MSG", Uid);
 	},
+	/**
+	 * 更新选中态
+	 * 设置当前选择的窗口的index
+	 */
 	updateSelected({ commit }, index) {
 		commit("UPDATE_SELECTED", index);
 	},
+	/**
+	 * 更新当前聊天对象uid
+	 */
 	updateCurrentUid({ commit}, Uid) {
 		commit("UPDATE_CURRENTUID", Uid);
 	},
+	/**
+	 * 清除预览窗口的未读消息(如果有的话)
+	 */
 	confirmMsg({ commit }, Uid) {
 		commit("CONFIRM_MSG", Uid);
 	},
+	/**
+	 * 修改预览消息内容
+	 * 删除聊天触发此操作
+	 */
 	changeMsg({ commit }, msg) {
 		commit("CHANGE_MSG", msg);
+	},
+	/**
+	 * 接收到消息
+	 */
+	receiveMsg({ commit }, msg) {
+		commit("RECEIVE_MSG", msg);
 	}
 }
 

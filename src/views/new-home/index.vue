@@ -25,6 +25,7 @@ export default {
 			}
 		);
 		this.loginNotice();
+		this.$store.dispatch("socket/initEvent", { uid: 666, component: this });
 	},
 	methods: {
 		/**
@@ -65,6 +66,10 @@ export default {
 				return "Hi，Cone，晚上好";
 			}
 			return "Hi，Cone，很晚了，快休息吧~";
+		},
+
+		initEvent() {
+			
 		}
 	}
 }
