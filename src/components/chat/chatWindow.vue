@@ -1,48 +1,59 @@
 <!-- 聊天窗口组件 -->
 <template>
-	<div class="chatWindow">
-		<!-- 聊天对象名称 -->
-		<div class="name-box">
-			<span class="name">Cone</span>
-		</div>
-		<div id="msg-info" class="msg-info">
-			<div v-for="(msg, index) in msgList" :class="msg.Type === 1 ? 'receive-box' : 'sendout-box'" :key="index">
-				<!-- 消息时间 -->
-				<div class="time-box">
-					<span class="time">{{tellTime(msg.Timestamp, 2)}}</span>
-				</div>
-				<!-- 接受到的消息 -->
-				<div v-if="msg.Type === 1" class="receive-msg-box">
-					<div class="chat-user-img">
-						<img src="@/assets/img/user/preview.jpg">
-					</div>
-					<div class="receiver-outter">
-						<div class="left-arrow"></div>
-						<span
-							class="receive-msg"
-							v-html="msg.Content"
-							@contextmenu="rightClick"
-							@mouseenter="recordMsg(msg)"
-						>
-						</span>
-					</div>
-				</div>
-				<!-- 发送的消息 -->
-				<div v-else class="send-msg-box">
-					<span
-						class="send-msg"
-						v-html="msg.Content"
-						@contextmenu="rightClick"
-						@mouseenter="recordMsg(msg)"
-					>
-					</span>
-					<div class="chat-user-img">
-						<div class="right-arrow"></div>
-						<img src="@/assets/img/user/cone.jpg">
-					</div>
-				</div>
-			</div>
-			<!-- <div class="receive-box">
+  <div class="chatWindow">
+    <!-- 聊天对象名称 -->
+    <div class="name-box">
+      <span class="name">Cone</span>
+    </div>
+    <div
+      id="msg-info"
+      class="msg-info"
+    >
+      <div
+        v-for="(msg, index) in msgList"
+        :key="index"
+        :class="msg.Type === 1 ? 'receive-box' : 'sendout-box'"
+      >
+        <!-- 消息时间 -->
+        <div class="time-box">
+          <span class="time">{{ tellTime(msg.Timestamp, 2) }}</span>
+        </div>
+        <!-- 接受到的消息 -->
+        <div
+          v-if="msg.Type === 1"
+          class="receive-msg-box"
+        >
+          <div class="chat-user-img">
+            <img src="@/assets/img/user/preview.jpg">
+          </div>
+          <div class="receiver-outter">
+            <div class="left-arrow" />
+            <span
+              class="receive-msg"
+              @contextmenu="rightClick"
+              @mouseenter="recordMsg(msg)"
+              v-html="msg.Content"
+            />
+          </div>
+        </div>
+        <!-- 发送的消息 -->
+        <div
+          v-else
+          class="send-msg-box"
+        >
+          <span
+            class="send-msg"
+            @contextmenu="rightClick"
+            @mouseenter="recordMsg(msg)"
+            v-html="msg.Content"
+          />
+          <div class="chat-user-img">
+            <div class="right-arrow" />
+            <img src="@/assets/img/user/cone.jpg">
+          </div>
+        </div>
+      </div>
+      <!-- <div class="receive-box">
 				<div class="time-box">
 					<span class="time">15:41</span>
 				</div>
@@ -56,7 +67,7 @@
 					</div>
 				</div>
 			</div> -->
-			<!-- <div class="sendout-box">
+      <!-- <div class="sendout-box">
 				<div class="time-box">
 					<span class="time">10:38</span>
 				</div>
@@ -68,46 +79,54 @@
 					</div>
 				</div>
 			</div> -->
-		</div>
-		<!-- 消息编辑区 -->
-		<div class="enter-msg">
-			<!-- 辅助操作区 -->
-			<div class="chatBar">
-				<!-- 选择表情 -->
-				<emotion @chooseEmotion="chooseEmotion"/>
-			</div>
-			<!-- 输入消息 -->
-			<div
-				ref="enterMsg"
-				class="msg-box"
-				id="msg-box"
-				contenteditable="true"
-				spellcheck="false"
-				@keydown.enter.prevent="sendMsg">
-			</div>
-			<!-- 发送消息 -->
-			<div class="send-box">
-				<span class="send-btn" @click="sendMsg">发送</span>
-			</div>
-		</div>
-		<right-click ref="rightClick" :commandList="rightClickCommand" @handleExecCommand="handleExecCommand"/>
-	</div>
+    </div>
+    <!-- 消息编辑区 -->
+    <div class="enter-msg">
+      <!-- 辅助操作区 -->
+      <div class="chatBar">
+        <!-- 选择表情 -->
+        <emotion @chooseEmotion="chooseEmotion" />
+      </div>
+      <!-- 输入消息 -->
+      <div
+        id="msg-box"
+        ref="enterMsg"
+        class="msg-box"
+        contenteditable="true"
+        spellcheck="false"
+        @keydown.enter.prevent="sendMsg"
+      />
+      <!-- 发送消息 -->
+      <div class="send-box">
+        <span
+          class="send-btn"
+          @click="sendMsg"
+        >
+          发送
+        </span>
+      </div>
+    </div>
+    <right-click
+      ref="rightClick"
+      :command-list="rightClickCommand"
+      @handleExecCommand="handleExecCommand"
+    />
+  </div>
 </template>
 
 <script>
-import Emotion from "@/components/chat/emotion";
-import RightClick from "@/components/right-click";
+import Emotion from '@/components/chat/emotion';
+import RightClick from '@/components/right-click';
 import { mapGetters } from 'vuex';
 import {
 	existTable,
 	createChatTable,
 	addRecord,
 	countTableMsg,
-	getHisMsg,
 	deleteDBRecord
-} from "@/utils/db/dbUtil";
+} from '@/utils/db/dbUtil';
 export default {
-	name: "chatWindow",
+	name: 'ChatWindow',
 	components: {
 		Emotion, RightClick
 	},
@@ -119,31 +138,31 @@ export default {
 			tempMsg: {}, // hover的消息(辅助右键菜单)
 			rightClickCommand: [
 				{
-					name: "转发",
-					commandKey: "forwardMsg"
+					name: '转发',
+					commandKey: 'forwardMsg'
 				},
 				{
-					name: "删除",
-					commandKey: "deleteMsg"
+					name: '删除',
+					commandKey: 'deleteMsg'
 				}
 			], // 右键菜单命令配置
 			msgList: [
 				{
 					Type: 1,
-					Content: "新年快乐！",
+					Content: '新年快乐！',
 					Timestamp: 1610201109000
 				},
 				{
 					Type: 2,
-					Content: "新年好！",
+					Content: '新年好！',
 					Timestamp: 1610288109000
 				}
 			]
-		}
+		};
 	},
 	computed: {
 		...mapGetters([
-			"db"
+			'db'
 		])
 	},
 	created() {
@@ -226,15 +245,15 @@ export default {
 				Msg,
 				Timestamp
 			};
-			this.$store.dispatch("previewMsg/updateMsg", previewMsg);
-			this.$store.dispatch("previewMsg/updateSelected", 0);
+			this.$store.dispatch('previewMsg/updateMsg', previewMsg);
+			this.$store.dispatch('previewMsg/updateSelected', 0);
 		},
 
 		/**
 		 * 清空消息
 		 */
 		clearMsg() {
-			this.$refs.enterMsg.innerHTML = "";
+			this.$refs.enterMsg.innerHTML = '';
 		},
 
 		/**
@@ -243,19 +262,19 @@ export default {
 		 * @param {string} src 表情的地址
 		 */
 		chooseEmotion(index, src) {
-			document.getElementById("msg-box").focus();
+			document.getElementById('msg-box').focus();
 			const imgElement = `<img src="${src}" width="24" height="24">`;
-			document.execCommand("insertHTML", false, imgElement);
+			document.execCommand('insertHTML', false, imgElement);
 		},
 
 		/**
 		 * 页面滚动至最新的那条消息
 		 */
 		toLatestMsg() {
-			let el = document.getElementById("msg-info");
+			const el = document.getElementById('msg-info');
 			setTimeout(function() {
-				let top = el.scrollHeight;
-				el.scroll({top, behavior: "smooth"})
+				const top = el.scrollHeight;
+				el.scroll({ top, behavior: 'smooth' });
 			});
 		},
 
@@ -273,7 +292,7 @@ export default {
 				const currentVersion = currentDB.version;
 				createChatTable(currentVersion, uid).then(
 					(db) => {
-						this.$store.dispatch("app/setDB", db);
+						this.$store.dispatch('app/setDB', db);
 					}
 				);
 			} else {
@@ -282,7 +301,7 @@ export default {
 					(res) => {
 						this.msgCount = res.data;
 					}
-				)
+				);
 			}
 		},
 		/**
@@ -309,10 +328,10 @@ export default {
 		 */
 		handleExecCommand(commandKey) {
 			if (commandKey && this.tempMsg) {
-				if (commandKey === "forwardMsg") {
+				if (commandKey === 'forwardMsg') {
 					// 暂未实现
 				}
-				if (commandKey === "deleteMsg") {
+				if (commandKey === 'deleteMsg') {
 					this.deleteMsg(this.tempMsg);
 				}
 			}
@@ -334,17 +353,17 @@ export default {
 							Msg: this.msgList[i - 1].Content,
 							Timestamp: this.msgList[i - 1].Timestamp
 						};
-						this.$store.dispatch("previewMsg/changeMsg", newPreviewMsg);
+						this.$store.dispatch('previewMsg/changeMsg', newPreviewMsg);
 					}
 					this.msgList.splice(i, 1);
 					break;
 				}
 			}
 			deleteDBRecord(currentDB, tableName, Timestamp);
-		},
+		}
 
 	}
-}
+};
 </script>
 
 <style lang="scss" scoped>
@@ -366,11 +385,11 @@ export default {
 		height: calc(100% - 166px);
 		overflow-y: auto;
 		padding-left: 20px;
-    	padding-right: 20px;
+    padding-right: 20px;
 		padding-bottom: 10px;
 		.receive-box {
 			margin-top: 2px;
-    		margin-bottom: 2px;
+    margin-bottom: 2px;
 			.receive-msg-box {
 				user-select: none;
 				.receiver-outter {
@@ -450,7 +469,7 @@ export default {
 			display: inline-block;
 			position: relative;
 			left: 11px;
-    		top: -2px;
+    top: -2px;
 			border-top: 6px solid transparent;
 			border-bottom: 6px solid transparent;
 			border-left: 0 solid transparent;
@@ -460,7 +479,7 @@ export default {
 			content: "";
 			position: absolute;
 			top: -5px;
-    		left: 1px;
+    left: 1px;
 			border-top: 5px solid transparent;
 			border-bottom: 5px solid transparent;
 			border-left: 0 solid transparent;
@@ -475,7 +494,7 @@ export default {
 			display: inline-block;
 			position: absolute;
 			left: -11px;
-    		top: 10px;
+    top: 10px;
 			border-top: 6px solid transparent;
 			border-bottom: 6px solid transparent;
 			border-left: 6px solid #9eea6a;
@@ -485,7 +504,7 @@ export default {
 			content: "";
 			position: absolute;
 			top: -5px;
-    		left: -7px;
+    left: -7px;
 			border-top: 5px solid transparent;
 			border-bottom: 5px solid transparent;
 			border-left: 5px solid #9eea6a;

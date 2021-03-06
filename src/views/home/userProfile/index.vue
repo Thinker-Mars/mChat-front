@@ -8,16 +8,16 @@
 
 <script>
 export default {
-	name: "userInfo",
+	name: 'userInfo',
 	data() {
 		return {
 
-		}
+		};
 	},
 	methods: {
 
 	}
-}
+};
 </script>
 
 <style lang="scss" scoped>

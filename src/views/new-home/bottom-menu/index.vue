@@ -1,40 +1,66 @@
 <template>
-	<div class="bottom-menu">
-		<div class="icon-container" @click="toggleMsg(true)">
-			<div class="unreadmsg" v-show="totalUnreadMsgCount > 0">{{totalUnreadMsgCount}}</div>
-			<img :src="msgSrc" class="bottom-menu-icon" data-msg="消息">
-		</div>
-		<div class="icon-container" @click="toggleIdea(true)">
-			<img :src="ideaSrc" class="bottom-menu-icon" data-msg="想法">
-		</div>
-		<div class="icon-container" @click="toggleSetting(true)">
-			<img :src="settingSrc" class="bottom-menu-icon" data-msg="设置">
-		</div>
-	</div>
+  <div class="bottom-menu">
+    <div
+      class="icon-container"
+      @click="toggleMsg(true)"
+    >
+      <div
+        v-show="totalUnreadMsgCount > 0"
+        class="unreadmsg"
+      >
+        {{ totalUnreadMsgCount }}
+      </div>
+      <img
+        :src="msgSrc"
+        class="bottom-menu-icon"
+        data-msg="消息"
+      >
+    </div>
+    <div
+      class="icon-container"
+      @click="toggleIdea(true)"
+    >
+      <img
+        :src="ideaSrc"
+        class="bottom-menu-icon"
+        data-msg="想法"
+      >
+    </div>
+    <div
+      class="icon-container"
+      @click="toggleSetting(true)"
+    >
+      <img
+        :src="settingSrc"
+        class="bottom-menu-icon"
+        data-msg="设置"
+      >
+    </div>
+  </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
-import msgUrl from "@/assets/img/bottom-menu/msg.svg";
-import activeMsgUrl from "@/assets/img/bottom-menu/msg-active.svg";
-import ideaUrl from "@/assets/img/bottom-menu/idea.svg";
-import activeideaUrl from "@/assets/img/bottom-menu/idea-active.svg";
-import settingUrl from "@/assets/img/bottom-menu/setting.svg";
-import activeSettingUrl from "@/assets/img/bottom-menu/setting-active.svg";
+import msgUrl from '@/assets/img/bottom-menu/msg.svg';
+import activeMsgUrl from '@/assets/img/bottom-menu/msg-active.svg';
+import ideaUrl from '@/assets/img/bottom-menu/idea.svg';
+import activeideaUrl from '@/assets/img/bottom-menu/idea-active.svg';
+import settingUrl from '@/assets/img/bottom-menu/setting.svg';
+import activeSettingUrl from '@/assets/img/bottom-menu/setting-active.svg';
 export default {
-	name: "bottom-menu",
+	name: 'BottomMenu',
 	data() {
 		return {
 			msgSrc: activeMsgUrl,
 			ideaSrc: ideaUrl,
 			settingSrc: settingUrl
-		}
+		};
 	},
 	computed: {
 		...mapGetters([
-			"selected",
-			"currentUid",
-			"totalUnreadMsgCount"
+			'selected',
+			'currentUid',
+			'totalUnreadMsgCount'
 		])
 	},
 	methods: {
@@ -47,7 +73,7 @@ export default {
 				this.msgSrc = activeMsgUrl;
 				this.toggleIdea(false);
 				this.toggleSetting(false);
-				if (this.allowJump("chat")) {
+				if (this.allowJump('Chat')) {
 					if (this.selected !== undefined) {
 						// 存在已选中的聊天窗口，显示对应的聊天窗口
 						if (this.allowJump2ChatWindow(this.currentUid)) {
@@ -55,14 +81,13 @@ export default {
 						}
 					} else {
 						// 当前没有选中的聊天窗口，展示[消息]页即可
-						this.$router.push("/home/chat");
+						this.$router.push('/home/chat');
 					}
 				}
 			} else {
 				this.msgSrc = msgUrl;
 			}
 		},
-
 		/**
 		 * 切换[想法页]状态
 		 * @param open true表示打开
@@ -72,14 +97,13 @@ export default {
 				this.ideaSrc = activeideaUrl;
 				this.toggleMsg(false);
 				this.toggleSetting(false);
-				if (this.allowJump("idea")) {
-					this.$router.push("/home/idea");
+				if (this.allowJump('Idea')) {
+					this.$router.push('/home/idea');
 				}
 			} else {
 				this.ideaSrc = ideaUrl;
 			}
 		},
-
 		/**
 		 * 切换[设置页]状态
 		 * @param open true表示打开
@@ -89,14 +113,13 @@ export default {
 				this.settingSrc = activeSettingUrl;
 				this.toggleMsg(false);
 				this.toggleIdea(false);
-				if (this.allowJump("setting")) {
-					this.$router.push("/home/setting");
+				if (this.allowJump('Setting')) {
+					this.$router.push('/home/setting');
 				}
 			} else {
 				this.settingSrc = settingUrl;
 			}
 		},
-
 		/**
 		 * 判断是否允许跳转
 		 * 如果当前页面与跳转页面一致，则不予跳转
@@ -104,19 +127,18 @@ export default {
 		 */
 		allowJump(target) {
 			const { name } = this.$route;
-			return name != target;
+			return name !== target;
 		},
-		
 		/**
 		 * 判断是否允许跳转至聊天窗口路由
 		 * @param {number} uid 用户id
 		 */
 		allowJump2ChatWindow(uid) {
 			const { path } = this.$route;
-			return path != `/home/chat/${uid}`;
+			return path !== `/home/chat/${uid}`;
 		}
 	}
-}
+};
 </script>
 
 <style scoped>

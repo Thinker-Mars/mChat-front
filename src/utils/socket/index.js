@@ -1,11 +1,10 @@
 import io from 'socket.io-client';
-import logger from "./logger";
-import Emitter from "./emitter";
-import Listener from "./listener";
+import logger from './logger';
+import Emitter from './emitter';
+import Listener from './listener';
 
 export default class SocketIO {
-
-	constructor({connection, options, debug}) {
+	constructor({ connection, options, debug }) {
 		logger.debug = debug;
 		this.io = this.connect(connection, options);
 		this.emitter = new Emitter();
@@ -15,10 +14,10 @@ export default class SocketIO {
 	/**
 	 * 建立socket连接
 	 * @param {string} connection 地址
-	 * @param {*} options 
+	 * @param {*} options
 	 */
 	connect(connection, options) {
-		logger.info("即将建立socket连接");
+		logger.info('即将建立socket连接');
 		return io(connection, options);
 	}
 

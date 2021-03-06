@@ -1,21 +1,20 @@
 <template>
-	<div class="idea">
-		<div class="container">
-			想法
-		</div>
-	</div>
+  <div class="idea">
+    <div class="container">
+      想法
+    </div>
+  </div>
 </template>
 
 <script>
 export default {
-	name: "idea",
+	name: 'Idea',
 	data() {
 		return {
 
-		}
+		};
 	}
-	
-}
+};
 </script>
 
 <style lang="scss" scoped>

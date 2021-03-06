@@ -3,7 +3,7 @@
 /**
  * 数据库名称
  */
-export const DATABASE_NAME = "mChat";
+export const DATABASE_NAME = 'mChat';
 
 /**
  * 数据库版本
@@ -21,13 +21,13 @@ export const TABLE_LIST = {
 	/**
 	 * 记录个人信息
 	 */
-	UserInfo: "userinfo",
+	UserInfo: 'userinfo',
 	/**
 	 * 记录好友的信息
 	 */
-	FriendInfo: "friendinfo",
+	FriendInfo: 'friendinfo',
 	/**
 	 * [消息页]左侧-预览消息列表信息
 	 */
-	PreviewList: "previewlist"
-}
+	PreviewList: 'previewlist'
+};

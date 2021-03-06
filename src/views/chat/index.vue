@@ -1,67 +1,78 @@
 <template>
-	<div class="chat">
-		<div class="container">
-			<div class="left-preview">
-				<div v-for="(preview, index) in previewMsgList"
-					:key="index"
-					:class="selected == index ? 'preview active' : 'preview'"
-					@click="checkMsgDetail(index, preview.Uid)"
-					@mouseenter="recordPreviewMsg(preview)"
-					@contextmenu="rightClick"
-				>
-					<div class="unreadmsg" v-show="preview.UnReadMsgCount > 0">
-						{{preview.UnReadMsgCount}}
-					</div>
-					<div class="img-box">
-						<img src="@/assets/img/user/preview.jpg">
-					</div>
-					<div class="msg-box">
-						<div class="top">
-							<span class="name">Cone</span>
-							<span class="time">{{tellTime(preview.Timestamp, 1)}}</span>
-						</div>
-						<div class="bottom" v-html="preview.Msg"></div>
-					</div>
-				</div>
-			</div>
-			<div class="right-window">
-				<keep-alive include="chatWindow">
-					<router-view :key="$route.params.Uid"></router-view>
-				</keep-alive>
-			</div>
-			<right-click ref="rightClick" :commandList="rightClickCommand" @handleExecCommand="handleExecCommand"/>
-		</div>
-	</div>
+  <div class="chat">
+    <div class="container">
+      <div class="left-preview">
+        <div
+          v-for="(preview, index) in previewMsgList"
+          :key="index"
+          :class="selected == index ? 'preview active' : 'preview'"
+          @click="checkMsgDetail(index, preview.Uid)"
+          @mouseenter="recordPreviewMsg(preview)"
+          @contextmenu="rightClick"
+        >
+          <div
+            v-show="preview.UnReadMsgCount > 0"
+            class="unreadmsg"
+          >
+            {{ preview.UnReadMsgCount }}
+          </div>
+          <div class="img-box">
+            <img src="@/assets/img/user/preview.jpg">
+          </div>
+          <div class="msg-box">
+            <div class="top">
+              <span class="name">Cone</span>
+              <span class="time">{{ tellTime(preview.Timestamp, 1) }}</span>
+            </div>
+            <div
+              class="bottom"
+              v-html="preview.Msg"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="right-window">
+        <keep-alive include="ChatWindow">
+          <router-view :key="$route.params.Uid" />
+        </keep-alive>
+      </div>
+      <right-click
+        ref="rightClick"
+        :command-list="rightClickCommand"
+        @handleExecCommand="handleExecCommand"
+      />
+    </div>
+  </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
-import RightClick from "@/components/right-click";
+import RightClick from '@/components/right-click';
 export default {
-	name: "chat",
+	name: 'Chat',
+	components: {
+		RightClick
+	},
 	data() {
 		return {
 			/** 右键菜单命令配置 */
 			rightClickCommand: [
 				{
-					name: "置顶",
-					commandKey: "placedTop"
+					name: '置顶',
+					commandKey: 'placedTop'
 				},
 				{
-					name: "删除聊天",
-					commandKey: "deletePreviewMsg"
+					name: '删除聊天',
+					commandKey: 'deletePreviewMsg'
 				}
 			],
 			tempPreviewMsg: {}
-		}
-	},
-	components: {
-		RightClick
+		};
 	},
 	computed: {
 		...mapGetters([
-			"previewMsgList",
-			"selected"
+			'previewMsgList',
+			'selected'
 		])
 	},
 	methods: {
@@ -70,14 +81,14 @@ export default {
 		 * @param {number} Uid 用户唯一id
 		 */
 		deletePreview(Uid) {
-			this.$store.dispatch("previewMsg/deleteMsg", Uid);
+			this.$store.dispatch('previewMsg/deleteMsg', Uid);
 		},
 		/**
 		 * 置顶某预览窗口
 		 * @param {number} Uid 用户唯一id
 		 */
 		placedTopPreview(Uid) {
-			this.$store.dispatch("previewMsg/placedTopMsg", Uid);
+			this.$store.dispatch('previewMsg/placedTopMsg', Uid);
 		},
 		/**
 		 * 点击[预览]，查看消息
@@ -86,24 +97,24 @@ export default {
 		 */
 		checkMsgDetail(index, Uid) {
 			// 更新当前选中窗口信息
-			this.$store.dispatch("previewMsg/updateSelected", index);
+			this.$store.dispatch('previewMsg/updateSelected', index);
 			// 更新当前聊天对象uid
-			this.$store.dispatch("previewMsg/updateCurrentUid", Uid);
+			this.$store.dispatch('previewMsg/updateCurrentUid', Uid);
 			// 清除未读消息(如果有的话)
-			this.$store.dispatch("previewMsg/confirmMsg", Uid);
+			this.$store.dispatch('previewMsg/confirmMsg', Uid);
 			if (this.allowJump(Uid)) {
 				// 查看消息
 				this.$router.push(`/home/chat/${Uid}`);
 			}
 		},
-		/** 
+		/**
 		 * 判断是否允许跳转
 		 * 避免重复跳转同一路由
 		 * @param {number} Uid 用户id
 		 */
 		allowJump(Uid) {
 			const { path } = this.$route;
-			return path != `/home/chat/${Uid}`;
+			return path !== `/home/chat/${Uid}`;
 		},
 		/*
 		 * 打开右键菜单
@@ -119,11 +130,11 @@ export default {
 		 */
 		handleExecCommand(commandKey) {
 			if (commandKey && this.tempPreviewMsg) {
-				if (commandKey === "placedTop") {
+				if (commandKey === 'placedTop') {
 					// 置顶
-					this.placedTopPreview(this.tempPreviewMsg.Uid)
+					this.placedTopPreview(this.tempPreviewMsg.Uid);
 				}
-				if (commandKey === "deletePreviewMsg") {
+				if (commandKey === 'deletePreviewMsg') {
 					// 删除聊天
 					this.deletePreview(this.tempPreviewMsg.Uid);
 				}
@@ -141,8 +152,7 @@ export default {
 			}
 		}
 	}
-	
-}
+};
 </script>
 
 <style lang="scss" scoped>

@@ -3,16 +3,13 @@
  */
 class Message {
 	/**
-	 * 
 	 * @param {Number} messageType 消息类型 详见: constants/message-constant
 	 * @param {Number} timeStamp 时间戳
 	 */
 	constructor(messageType, timeStamp) {
 		this.messageType = messageType;
-		this.timeStamp = timeStamp
-	}
-
-
+		this.timeStamp = timeStamp;
+	};
 }
 
 export default Message;

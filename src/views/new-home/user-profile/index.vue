@@ -1,23 +1,23 @@
 <template>
-	<div class="userInfo">
-		<div class="icon">
-			<img src="@/assets/img/user/cone.jpg">
-		</div>
-	</div>
+  <div class="userInfo">
+    <div class="icon">
+      <img src="@/assets/img/user/cone.jpg">
+    </div>
+  </div>
 </template>
 
 <script>
 export default {
-	name: "userInfo",
+	name: 'UserInfo',
 	data() {
 		return {
 
-		}
+		};
 	},
 	methods: {
 
 	}
-}
+};
 </script>
 
 <style lang="scss" scoped>

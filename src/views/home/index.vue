@@ -26,17 +26,12 @@
 </template>
 
 <script>
-import sideMenu from "./sideMenu/index";
-import userProfile from "./userProfile/index";
-import {sendMsg} from "@/api/send";
-import {genRandomNum} from "@/utils/commonFun";
-import Vue from 'vue'
+import sideMenu from './sideMenu/index';
+import userProfile from './userProfile/index';
+import { genRandomNum } from '@/utils/commonFun';
 export default {
-
-	name: "home",
-
+	name: 'home',
 	components: { sideMenu, userProfile },
-
 	data() {
 		return {
 			tempUid: genRandomNum(6),
@@ -44,25 +39,23 @@ export default {
 			sendMsg: undefined,
 			msgArr: [],
 			socket: undefined
-		}
+		};
 	},
-
 	created() {
 		// this.socket = this.$store.getters.socket;
 		// this.initEvent();
 	},
-
 	methods: {
 		/**
 		 * 初始化监听事件
 		 */
 		initEvent() {
-			let that = this;
-			that.socket.subscribe("connect", function() {
+			const that = this;
+			that.socket.subscribe('connect', function() {
 				that.initRoom();
 			}, that);
-			that.socket.subscribe("receiveUserMsg", function(data) {
-				let {tid, msg} = data;
+			that.socket.subscribe('receiveUserMsg', function(data) {
+				const { tid, msg } = data;
 				that.renderMsg(tid, msg, 2);
 			}, that);
 		},
@@ -71,10 +64,10 @@ export default {
 		 * 以UID作为room的key
 		 */
 		initRoom() {
-			let {io} = this.socket;
+			const { io } = this.socket;
 			const socketId = io.id;
-			let data = { uid: this.tempUid, socketId };
-			io.emit("initUserRoom", data);
+			const data = { uid: this.tempUid, socketId };
+			io.emit('initUserRoom', data);
 		},
 
 		/**
@@ -84,15 +77,15 @@ export default {
 			if (!this.tid || !this.sendMsg) {
 				return;
 			}
-			let {io} = this.socket;
-			let data = {
+			const { io } = this.socket;
+			const data = {
 				uid: this.tempUid,
 				msg: this.sendMsg,
 				tid: this.tid
 			};
-			io.emit("sendMsgToUser", data);
+			io.emit('sendMsgToUser', data);
 			this.renderMsg(this.tempUid, data.msg, 1);
-			this.sendMsg = "";
+			this.sendMsg = '';
 		},
 
 		/**
@@ -101,19 +94,18 @@ export default {
 		 * @param {String} msg 消息内容
 		 * @param {Number} type 消息类型，1:发送 2:接收
 		 */
-		renderMsg(uid = "", msg = "", type) {
-			let timestamp = (new Date()).getTime();
-			let _receive = document.getElementById("receive");
-			this.msgArr.push({timestamp, uid, msg, type});
+		renderMsg(uid = '', msg = '', type) {
+			const timestamp = (new Date()).getTime();
+			const _receive = document.getElementById('receive');
+			this.msgArr.push({ timestamp, uid, msg, type });
 			// 消息展示区域滚动至最下面
 			setTimeout(function() {
-				let top = _receive.scrollHeight;
-				_receive.scroll({top, behavior: "smooth"})
+				const top = _receive.scrollHeight;
+				_receive.scroll({ top, behavior: 'smooth' });
 			}, 0);
 		}
-
 	}
-}
+};
 </script>
 
 <style lang="scss" scoped>

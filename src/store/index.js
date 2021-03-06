@@ -1,12 +1,12 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
-import app from "./modules/app";
-import user from "./modules/user";
-import socket from "./modules/socket";
-import getters from "./getters";
-import previewMsg from "./modules/preview-msg";
+import Vue from 'vue';
+import Vuex from 'vuex';
+import app from './modules/app';
+import user from './modules/user';
+import socket from './modules/socket';
+import getters from './getters';
+import previewMsg from './modules/preview-msg';
 
-Vue.use(Vuex)
+Vue.use(Vuex);
 
 const store = new Vuex.Store({
 	modules: {
@@ -16,6 +16,6 @@ const store = new Vuex.Store({
 		previewMsg
 	},
 	getters
-})
+});
 
 export default store;

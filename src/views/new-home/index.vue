@@ -1,19 +1,19 @@
 <template>
-	<div class="new-home">
-		<keep-alive include="chat,setting,idea">
-			<router-view></router-view>
-		</keep-alive>
-		<bottom-menu />
-		<user-profile />
-	</div>
+  <div class="new-home">
+    <keep-alive include="Chat,Setting,Idea">
+      <router-view />
+    </keep-alive>
+    <bottom-menu />
+    <user-profile />
+  </div>
 </template>
 
 <script>
-import BottomMenu from "./bottom-menu";
-import UserProfile from "./user-profile";
-import { initDB } from "@/utils/db/dbUtil";
+import BottomMenu from './bottom-menu';
+import UserProfile from './user-profile';
+import { initDB } from '@/utils/db/dbUtil';
 export default {
-	name: "new-home",
+	name: 'NewHome',
 	components: {
 		BottomMenu,
 		UserProfile
@@ -21,11 +21,11 @@ export default {
 	created() {
 		initDB().then(
 			db => {
-				this.$store.dispatch("app/setDB", db);
+				this.$store.dispatch('app/setDB', db);
 			}
 		);
 		this.loginNotice();
-		this.$store.dispatch("socket/initEvent", { uid: 666, component: this });
+		this.$store.dispatch('socket/initEvent', { uid: 666, component: this });
 	},
 	methods: {
 		/**
@@ -35,14 +35,14 @@ export default {
 			const currentHour = (new Date()).getHours();
 			const greet = this.getGreetByHour(currentHour);
 			const myNotification = new Notification(
-				"mChat",
+				'mChat',
 				{
 					body: greet
 				}
 			);
 			myNotification.onclick = function() {
 				myNotification.close();
-			}
+			};
 		},
 
 		/**
@@ -51,28 +51,24 @@ export default {
 		 */
 		getGreetByHour(hour) {
 			if (hour < 6) {
-				return "Hi，Cone，这么晚没睡，出了什么事呢";
+				return 'Hi，Cone，这么晚没睡，出了什么事呢';
 			}
 			if (hour < 11) {
-				return "Hi，Cone，早上好";
+				return 'Hi，Cone，早上好';
 			}
 			if (hour < 14) {
-				return "Hi，Cone，中午好，午饭吃过了吗";
+				return 'Hi，Cone，中午好，午饭吃过了吗';
 			}
 			if (hour < 17) {
-				return "Hi，Cone，下午好";
+				return 'Hi，Cone，下午好';
 			}
 			if (hour < 22) {
-				return "Hi，Cone，晚上好";
+				return 'Hi，Cone，晚上好';
 			}
-			return "Hi，Cone，很晚了，快休息吧~";
-		},
-
-		initEvent() {
-			
+			return 'Hi，Cone，很晚了，快休息吧~';
 		}
 	}
-}
+};
 </script>
 
 <style scoped>

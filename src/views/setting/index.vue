@@ -1,21 +1,20 @@
 <template>
-	<div class="setting">
-		<div class="container">
-			设置
-		</div>
-	</div>
+  <div class="setting">
+    <div class="container">
+      设置
+    </div>
+  </div>
 </template>
 
 <script>
 export default {
-	name: "setting",
+	name: 'Setting',
 	data() {
 		return {
 
-		}
+		};
 	}
-	
-}
+};
 </script>
 
 <style lang="scss" scoped>

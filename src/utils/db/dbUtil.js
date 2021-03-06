@@ -1,5 +1,5 @@
-import { DATABASE_NAME, VERSION, TABLE_LIST } from "@/utils/constants/db-constant";
-import Tables from "@/utils/db/pojo/index";
+import { DATABASE_NAME, VERSION, TABLE_LIST } from '@/utils/constants/db-constant';
+import Tables from '@/utils/db/pojo/index';
 
 /**
  * 获取数据库对象
@@ -9,12 +9,12 @@ import Tables from "@/utils/db/pojo/index";
  */
 export function getDB(dbName, version) {
 	return new Promise(function(resolve, reject) {
-		let request = window.indexedDB.open(dbName, version);
+		const request = window.indexedDB.open(dbName, version);
 		request.onsuccess = function(e) {
 			const db = e.target.result;
 			resolve(db);
-		}
-	})
+		};
+	});
 }
 
 /**
@@ -22,27 +22,27 @@ export function getDB(dbName, version) {
  */
 export function initDB() {
 	return new Promise(function(resolve, reject) {
-		let request = window.indexedDB.open(DATABASE_NAME, VERSION);
+		const request = window.indexedDB.open(DATABASE_NAME, VERSION);
 		request.onupgradeneeded = function(e) {
 			const db = e.target.result;
-			for (let tableName in TABLE_LIST) {
+			for (const tableName in TABLE_LIST) {
 				if (!db.objectStoreNames.contains(tableName)) {
 					const table = Tables[tableName];
-					let optionalParameters = {};
+					const optionalParameters = {};
 					if (table.keyPath) {
-						optionalParameters["keyPath"] = table.keyPath;
+						optionalParameters['keyPath'] = table.keyPath;
 					}
 					if (table.autoIncrement) {
-						optionalParameters["autoIncrement"] = table.autoIncrement;
+						optionalParameters['autoIncrement'] = table.autoIncrement;
 					}
-					let objectStore = db.createObjectStore(tableName, optionalParameters);
-					for (let column in table.columns) {
-						objectStore.createIndex(column, column, {unique: table.columns[column].unique});
+					const objectStore = db.createObjectStore(tableName, optionalParameters);
+					for (const column in table.columns) {
+						objectStore.createIndex(column, column, { unique: table.columns[column].unique });
 					}
 				}
 			}
 			resolve(db);
-		}
+		};
 	});
 }
 
@@ -54,24 +54,24 @@ export function initDB() {
 export function createChatTable(version, uid) {
 	return new Promise(function(resolve, reject) {
 		const tableName = `${uid}-chat`;
-		let request = window.indexedDB.open(DATABASE_NAME, version + 1);
+		const request = window.indexedDB.open(DATABASE_NAME, version + 1);
 		request.onupgradeneeded = function(e) {
 			const db = e.target.result;
-			const table = Tables["Chat"];
-			let optionalParameters = {};
+			const table = Tables['Chat'];
+			const optionalParameters = {};
 			if (table.keyPath) {
-				optionalParameters["keyPath"] = table.keyPath;
+				optionalParameters['keyPath'] = table.keyPath;
 			}
 			if (table.autoIncrement) {
-				optionalParameters["autoIncrement"] = table.autoIncrement;
+				optionalParameters['autoIncrement'] = table.autoIncrement;
 			}
-			let objectStore = db.createObjectStore(tableName, optionalParameters);
-			for (let column in table.columns) {
-				objectStore.createIndex(column, column, {unique: table.columns[column].unique});
+			const objectStore = db.createObjectStore(tableName, optionalParameters);
+			for (const column in table.columns) {
+				objectStore.createIndex(column, column, { unique: table.columns[column].unique });
 			}
 			resolve(db);
-		}
-	})
+		};
+	});
 }
 
 /**
@@ -91,9 +91,9 @@ export function existTable(tableName, db) {
  */
 export function addRecord(db, tableName, data) {
 	return new Promise(function(resolve, reject) {
-		let request = db.transaction(tableName, "readwrite")
-		.objectStore(tableName)
-		.add(data);
+		const request = db.transaction(tableName, 'readwrite')
+			.objectStore(tableName)
+			.add(data);
 		request.onsuccess = function() {
 			resolve({
 				code: 1000
@@ -103,33 +103,33 @@ export function addRecord(db, tableName, data) {
 			reject({
 				code: 0,
 				msg: e.target.error
-			})
-		}
-	})
+			});
+		};
+	});
 }
 
 /**
  * 获取某张表中的数据量
- * @param {IDBDatabase} db 
- * @param {string} tableName 
+ * @param {IDBDatabase} db
+ * @param {string} tableName
  */
 export function countTableMsg(db, tableName) {
 	return new Promise(function(resolve, reject) {
-		let request = db.transaction(tableName, "readonly")
-		.objectStore(tableName)
-		.count();
+		const request = db.transaction(tableName, 'readonly')
+			.objectStore(tableName)
+			.count();
 		request.onsuccess = function(e) {
 			resolve({
 				code: 1000,
 				data: e.target.result
 			});
-		}
-	})
+		};
+	});
 }
 
 /**
  * 获取 [db]-[tableName]下索引在[upper]前的[count]条记录
- * @param {IDBDatabase} db 
+ * @param {IDBDatabase} db
  * @param {string} tableName 数据表名称
  * @param {number} upper 右边界
  * @param {number} count 数量
@@ -140,11 +140,11 @@ export function getHisMsg(db, tableName, upper, count = 20) {
 		// 开区间，不包含两头
 		const keyRange = IDBKeyRange.bound(lower, upper);
 		let records = [];
-		let request = db.transaction(tableName, "readonly")
-		.objectStore(tableName)
-		.openCursor(keyRange);
+		const request = db.transaction(tableName, 'readonly')
+			.objectStore(tableName)
+			.openCursor(keyRange);
 		request.onsuccess = function(e) {
-			let cursor = e.target.result;
+			const cursor = e.target.result;
 			if (cursor) {
 				records.push(cursor.value);
 				cursor.continue();
@@ -152,28 +152,28 @@ export function getHisMsg(db, tableName, upper, count = 20) {
 				resolve({
 					code: 1000,
 					data: records
-				})
+				});
 			}
-		}
-	})
+		};
+	});
 }
 
 /**
  * 删除 [db]-[tableName]下时间戳为[timeStamp]的某条聊天记录
  * 适用于聊天记录的删除
- * @param {IDBDatabase} db 
- * @param {string} tableName 
- * @param {number} timeStamp 
+ * @param {IDBDatabase} db
+ * @param {string} tableName
+ * @param {number} timeStamp
  */
 export function deleteDBRecord(db, tableName, timeStamp) {
 	return new Promise(function(resolve, reject) {
-		let request = db.transaction(tableName, "readwrite")
-		.objectStore(tableName)
-		.delete(timeStamp);
+		const request = db.transaction(tableName, 'readwrite')
+			.objectStore(tableName)
+			.delete(timeStamp);
 		request.onsuccess = function() {
 			resolve({
 				code: 1000
-			})
-		}
-	})
+			});
+		};
+	});
 }

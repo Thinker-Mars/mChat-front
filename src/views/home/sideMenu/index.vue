@@ -13,23 +13,23 @@
 
 <script>
 export default {
-	name: "sideMenu",
+	name: 'sideMenu',
 	data() {
 		return {
 			menuList: [
-				{key: "msg", title: "消息", icon: "message"},
-				{key: "friend", title: "联系人", icon: "contacts"},
-				{key: "look", title: "看一看", icon: "global"},
-				{key: "add", title: "添加", icon: "user-add"},
-				{key: "setUp", title: "设置", icon: "setting"}
+				{ key: 'msg', title: '消息', icon: 'message' },
+				{ key: 'friend', title: '联系人', icon: 'contacts' },
+				{ key: 'look', title: '看一看', icon: 'global' },
+				{ key: 'add', title: '添加', icon: 'user-add' },
+				{ key: 'setUp', title: '设置', icon: 'setting' }
 			],
 			collapsed: false
-		}
+		};
 	},
 	methods: {
 
 	}
-}
+};
 </script>
 
 <style lang="scss">

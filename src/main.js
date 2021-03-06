@@ -1,10 +1,9 @@
-import Vue from 'vue'
-import App from './App.vue'
-import router from './router'
-import store from './store'
-import {connect} from "./api/connect";
+import Vue from 'vue';
+import App from './App.vue';
+import router from './router';
+import store from './store';
 import { Button, Form, Input, Menu, Icon } from 'ant-design-vue';
-import { tellTime } from "@/utils/commonFun";
+import { tellTime } from '@/utils/commonFun';
 
 Vue.use(Form);
 Vue.use(Input);
@@ -20,4 +19,4 @@ new Vue({
 	router,
 	store,
 	render: h => h(App)
-}).$mount('#app')
+}).$mount('#app');

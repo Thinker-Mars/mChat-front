@@ -1,9 +1,8 @@
-import Message from "./message";
-import {CHAT_MESSAGE} from "@/utils/constants/message-constant";
+import Message from './message';
+import { CHAT_MESSAGE } from '@/utils/constants/message-constant';
 
 class ChatMessage extends Message {
 	/**
-	 * 
 	 * @param {Number} uid 发送者uid
 	 * @param {Number} targetUid 接收者uid
 	 * @param {*} message 消息
@@ -14,9 +13,7 @@ class ChatMessage extends Message {
 		this.uid = uid;
 		this.targetUid = targetUid;
 		this.message = message;
-	}
-	
+	};
 }
-
 
 export default ChatMessage;

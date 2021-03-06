@@ -12,6 +12,6 @@ const getters = {
 	currentUid: state => state.previewMsg.currentUid,
 	/** 预览列表未读消息总数 */
 	totalUnreadMsgCount: state => state.previewMsg.totalUnreadMsgCount
-}
+};
 
-export default getters
+export default getters;

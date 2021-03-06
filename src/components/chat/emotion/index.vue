@@ -1,34 +1,46 @@
 <template>
-	<div class="emotion">
-		<img src="@/assets/img/chatbar/emotion.svg" class="emotion-switch" @click="openToggle">
-		<div class="emotion-box" v-show="showEmotion">
-			<div v-for="(emotion, index) in emotionList" :key="index" class="emotion-img" @click="chooseEmotion(index, emotion.src)">
-				<img :src="emotion.src">
-			</div>
-		</div>
-	</div>
+  <div class="emotion">
+    <img
+      src="@/assets/img/chatbar/emotion.svg"
+      class="emotion-switch"
+      @click="openToggle"
+    >
+    <div
+      v-show="showEmotion"
+      class="emotion-box"
+    >
+      <div
+        v-for="(emotion, index) in emotionList"
+        :key="index"
+        class="emotion-img"
+        @click="chooseEmotion(index, emotion.src)"
+      >
+        <img :src="emotion.src">
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
-import EmotionList from "./emotionList";
+import EmotionList from './emotionList';
 export default {
-	name: "emotion",
+	name: 'Emotion',
 	data() {
 		return {
 			showEmotion: false,
 			emotionList: EmotionList
-		}
+		};
 	},
 	methods: {
 		openToggle() {
 			this.showEmotion = !this.showEmotion;
 		},
 		chooseEmotion(index, src) {
-			this.$emit("chooseEmotion", index, src);
+			this.$emit('chooseEmotion', index, src);
 			this.openToggle();
 		}
 	}
-}
+};
 </script>
 
 <style lang="scss" scoped>
