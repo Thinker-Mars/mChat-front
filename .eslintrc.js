@@ -1,7 +1,11 @@
 module.exports = {
 	extends: [
-		'plugin:vue/recommended'
+		'plugin:vue/recommended',
+		'eslint:recommended'
 	],
+	globals: {
+		'module': true
+	},
 	rules: {
 		// 禁用
 		'no-alert': 0,
@@ -171,7 +175,7 @@ module.exports = {
 		// 禁用行尾空格
 		'no-trailing-spaces': 'error',
 		// // 禁用未声明的变量
-		// 'no-undef': 'error',
+		'no-undef': 'error',
 		// 禁止可以表达为更简单结构的三元操作符
 		'no-unneeded-ternary': ['error', {
 			// 禁止条件表达式作为默认的赋值模式
