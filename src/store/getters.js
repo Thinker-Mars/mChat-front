@@ -1,5 +1,4 @@
 const getters = {
-	db: state => state.app.db,
 	/** 当前登录用户唯一id */
 	uid: state => state.user.uid,
 	/** socket连接实例 */

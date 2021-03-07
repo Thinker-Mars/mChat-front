@@ -6,9 +6,9 @@
 export const DATABASE_NAME = 'mChat';
 
 /**
- * 数据库版本
+ * localStorage中[数据库版本]的标识
  */
-export const VERSION = 1;
+export const DB_VERSION_IDENTIFY = 'dbVersion';
 
 /**
  * 数据表名称集合

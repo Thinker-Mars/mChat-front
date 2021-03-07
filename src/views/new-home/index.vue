@@ -11,7 +11,8 @@
 <script>
 import BottomMenu from './bottom-menu';
 import UserProfile from './user-profile';
-import { initDB } from '@/utils/db/dbUtil';
+import { initDB, getLocalDBVersion } from '@/utils/db/dbUtil';
+import { DATABASE_NAME } from '@/utils/constants/db-constant';
 export default {
 	name: 'NewHome',
 	components: {
@@ -19,15 +20,18 @@ export default {
 		UserProfile
 	},
 	created() {
-		initDB().then(
-			db => {
-				this.$store.dispatch('app/setDB', db);
-			}
-		);
+		this.init();
 		this.loginNotice();
-		this.$store.dispatch('socket/initEvent', { uid: 666, component: this });
 	},
 	methods: {
+		init() {
+			const dbVersion = getLocalDBVersion();
+			initDB(DATABASE_NAME, dbVersion);
+			this.initSocket();
+		},
+		initSocket() {
+			this.$store.dispatch('socket/initEvent', { uid: 666, component: this });
+		},
 		/**
 		 * 登录提示
 		 */

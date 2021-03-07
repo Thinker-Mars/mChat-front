@@ -117,13 +117,15 @@
 <script>
 import Emotion from '@/components/chat/emotion';
 import RightClick from '@/components/right-click';
-import { mapGetters } from 'vuex';
+import { DATABASE_NAME } from '@/utils/constants/db-constant';
 import {
+	getDB,
 	existTable,
 	createChatTable,
 	addRecord,
 	countTableMsg,
-	deleteDBRecord
+	deleteDBRecord,
+	getLocalDBVersion
 } from '@/utils/db/dbUtil';
 export default {
 	name: 'ChatWindow',
@@ -160,11 +162,6 @@ export default {
 			]
 		};
 	},
-	computed: {
-		...mapGetters([
-			'db'
-		])
-	},
 	created() {
 		this.initData();
 		this.checkTableBeforeChat();
@@ -189,7 +186,7 @@ export default {
 				return;
 			}
 			// 本地存储消息
-			this.storageData(this.db, this.chatTableName, msg, timestamp);
+			this.storageData(this.chatTableName, msg, timestamp);
 			// 更新页面聊天数据
 			this.updateChatMsgList(msg, timestamp);
 			// 更新左侧预览列表数据
@@ -202,18 +199,22 @@ export default {
 
 		/**
 		 * 本地保存用户发送的消息
-		 * @param {IDBDatabase} db
 		 * @param {string} tableName 存储消息的数据表名称
 		 * @param {string} msg 消息
 		 * @param {number} timestamp 消息产生时间(ms)
 		 */
-		storageData(db, tableName, msg, timestamp) {
+		storageData(tableName, msg, timestamp) {
 			const data = {
 				Type: 2,
 				Content: msg,
 				Timestamp: timestamp
 			};
-			addRecord(db, tableName, data);
+			const dbVersion = getLocalDBVersion();
+			getDB(DATABASE_NAME, dbVersion).then(
+				(db) => {
+					addRecord(db, tableName, data);
+				}
+			);
 		},
 
 		updateCount() {
@@ -283,26 +284,26 @@ export default {
 		 * 没有则新建
 		 */
 		checkTableBeforeChat() {
-			const currentDB = this.db;
 			const uid = this.friendUid;
 			const tableName = `${uid}-chat`;
-			if (!existTable(tableName, currentDB)) {
-				// 表不存在，新建数据表
-				currentDB.close();
-				const currentVersion = currentDB.version;
-				createChatTable(currentVersion, uid).then(
-					(db) => {
-						this.$store.dispatch('app/setDB', db);
+			const dbVersion = getLocalDBVersion();
+			getDB(DATABASE_NAME, dbVersion).then(
+				(db) => {
+					// 表不存在，新建数据表
+					if (!existTable(tableName, db)) {
+						db.close();
+						const currentVersion = db.version;
+						createChatTable(currentVersion, uid);
+					} else {
+						// 表已存在，获取当前表中数据量
+						countTableMsg(db, tableName).then(
+							(res) => {
+								this.msgCount = res.data;
+							}
+						);
 					}
-				);
-			} else {
-				// 表已存在，获取当前表中数据量
-				countTableMsg(currentDB, tableName).then(
-					(res) => {
-						this.msgCount = res.data;
-					}
-				);
-			}
+				}
+			);
 		},
 		/**
 		 * 打开右键菜单
@@ -342,10 +343,12 @@ export default {
 		 */
 		deleteMsg(msg) {
 			const { Timestamp } = msg;
-			const currentDB = this.db;
 			const tableName = `${this.friendUid}-chat`;
+			const dbVersion = getLocalDBVersion();
+			let needDelete = false;
 			for (let i = 0; i < this.msgList.length; i++) {
 				if (this.msgList[i].Type === msg.Type && this.msgList[i].Timestamp === msg.Timestamp) {
+					needDelete = true;
 					if (i === this.msgList.length - 1 && this.msgList.length > 1) {
 						// 删除的是页面最后一条记录，删除后，需要更新左侧预览消息内容为上一条消息
 						const newPreviewMsg = {
@@ -359,7 +362,13 @@ export default {
 					break;
 				}
 			}
-			deleteDBRecord(currentDB, tableName, Timestamp);
+			if (needDelete) {
+				getDB(DATABASE_NAME, dbVersion).then(
+					(db) => {
+						deleteDBRecord(db, tableName, Timestamp);
+					}
+				);
+			}
 		}
 
 	}
