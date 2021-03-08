@@ -4,8 +4,8 @@ import UserInfo from './user-info';
 import Chat from './chat';
 
 export default {
-	FriendInfo,
-	PreviewList,
-	UserInfo,
-	Chat
+  FriendInfo,
+  PreviewList,
+  UserInfo,
+  Chat
 };

@@ -24,22 +24,22 @@
 <script>
 import EmotionList from './emotionList';
 export default {
-	name: 'Emotion',
-	data() {
-		return {
-			showEmotion: false,
-			emotionList: EmotionList
-		};
-	},
-	methods: {
-		openToggle() {
-			this.showEmotion = !this.showEmotion;
-		},
-		chooseEmotion(index, src) {
-			this.$emit('chooseEmotion', index, src);
-			this.openToggle();
-		}
-	}
+  name: 'Emotion',
+  data() {
+    return {
+      showEmotion: false,
+      emotionList: EmotionList
+    };
+  },
+  methods: {
+    openToggle() {
+      this.showEmotion = !this.showEmotion;
+    },
+    chooseEmotion(index, src) {
+      this.$emit('chooseEmotion', index, src);
+      this.openToggle();
+    }
+  }
 };
 </script>
 

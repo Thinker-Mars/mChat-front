@@ -8,15 +8,15 @@
 
 <script>
 export default {
-	name: 'UserInfo',
-	data() {
-		return {
+  name: 'UserInfo',
+  data() {
+    return {
 
-		};
-	},
-	methods: {
+    };
+  },
+  methods: {
 
-	}
+  }
 };
 </script>
 

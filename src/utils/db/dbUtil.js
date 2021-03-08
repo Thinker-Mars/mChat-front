@@ -7,14 +7,14 @@ import Tables from '@/utils/db/pojo/index';
  * @param {number} version 数据库版本
  */
 export function getDB(dbName, version) {
-	return new Promise(function(resolve, reject) {
-		const request = window.indexedDB.open(dbName, version);
-		// 返回已有数据库
-		request.onsuccess = function(e) {
-			const db = e.target.result;
-			resolve(db);
-		};
-	});
+  return new Promise(function(resolve, reject) {
+    const request = window.indexedDB.open(dbName, version);
+    // 返回已有数据库
+    request.onsuccess = function(e) {
+      const db = e.target.result;
+      resolve(db);
+    };
+  });
 }
 
 /**
@@ -22,46 +22,46 @@ export function getDB(dbName, version) {
  * 如果用户第一次使用则返回1
  */
 export function getLocalDBVersion() {
-	const dbVersion = localStorage.getItem(DB_VERSION_IDENTIFY);
-	if (dbVersion) {
-		return dbVersion;
-	}
-	return 1;
+  const dbVersion = localStorage.getItem(DB_VERSION_IDENTIFY);
+  if (dbVersion) {
+    return dbVersion;
+  }
+  return 1;
 }
 
 /**
  * 更新localStorage中的数据库版本
  */
 export function updateLocalDBVersion(dbVersion) {
-	localStorage.setItem(DB_VERSION_IDENTIFY, dbVersion);
+  localStorage.setItem(DB_VERSION_IDENTIFY, dbVersion);
 }
 
 /**
  * 初始化数据库
  */
 export function initDB(dbName, dbVersion) {
-	const request = window.indexedDB.open(dbName, dbVersion);
-	request.onupgradeneeded = function(e) {
-		updateLocalDBVersion(dbVersion);
-		const db = e.target.result;
-		for (const tableName in TABLE_LIST) {
-			if (!db.objectStoreNames.contains(tableName)) {
-				const table = Tables[tableName];
-				const optionalParameters = {};
-				if (table.keyPath) {
-					optionalParameters['keyPath'] = table.keyPath;
-				}
-				if (table.autoIncrement) {
-					optionalParameters['autoIncrement'] = table.autoIncrement;
-				}
-				const objectStore = db.createObjectStore(tableName, optionalParameters);
-				for (const column in table.columns) {
-					objectStore.createIndex(column, column, { unique: table.columns[column].unique });
-				}
-			}
-		}
-		db.close();
-	};
+  const request = window.indexedDB.open(dbName, dbVersion);
+  request.onupgradeneeded = function(e) {
+    updateLocalDBVersion(dbVersion);
+    const db = e.target.result;
+    for (const tableName in TABLE_LIST) {
+      if (!db.objectStoreNames.contains(tableName)) {
+        const table = Tables[tableName];
+        const optionalParameters = {};
+        if (table.keyPath) {
+          optionalParameters['keyPath'] = table.keyPath;
+        }
+        if (table.autoIncrement) {
+          optionalParameters['autoIncrement'] = table.autoIncrement;
+        }
+        const objectStore = db.createObjectStore(tableName, optionalParameters);
+        for (const column in table.columns) {
+          objectStore.createIndex(column, column, { unique: table.columns[column].unique });
+        }
+      }
+    }
+    db.close();
+  };
 }
 
 /**
@@ -70,25 +70,25 @@ export function initDB(dbName, dbVersion) {
  * @param {number} uid 朋友的uid
  */
 export function createChatTable(version, uid) {
-	const tableName = `${uid}-chat`;
-	const request = window.indexedDB.open(DATABASE_NAME, version + 1);
-	request.onupgradeneeded = function(e) {
-		updateLocalDBVersion(version + 1);
-		const db = e.target.result;
-		const table = Tables['Chat'];
-		const optionalParameters = {};
-		if (table.keyPath) {
-			optionalParameters['keyPath'] = table.keyPath;
-		}
-		if (table.autoIncrement) {
-			optionalParameters['autoIncrement'] = table.autoIncrement;
-		}
-		const objectStore = db.createObjectStore(tableName, optionalParameters);
-		for (const column in table.columns) {
-			objectStore.createIndex(column, column, { unique: table.columns[column].unique });
-		}
-		db.close();
-	};
+  const tableName = `${uid}-chat`;
+  const request = window.indexedDB.open(DATABASE_NAME, version + 1);
+  request.onupgradeneeded = function(e) {
+    updateLocalDBVersion(version + 1);
+    const db = e.target.result;
+    const table = Tables['Chat'];
+    const optionalParameters = {};
+    if (table.keyPath) {
+      optionalParameters['keyPath'] = table.keyPath;
+    }
+    if (table.autoIncrement) {
+      optionalParameters['autoIncrement'] = table.autoIncrement;
+    }
+    const objectStore = db.createObjectStore(tableName, optionalParameters);
+    for (const column in table.columns) {
+      objectStore.createIndex(column, column, { unique: table.columns[column].unique });
+    }
+    db.close();
+  };
 }
 
 /**
@@ -97,7 +97,7 @@ export function createChatTable(version, uid) {
  * @param {IDBDatabase} db 数据库
  */
 export function existTable(tableName, db) {
-	return db.objectStoreNames.contains(tableName);
+  return db.objectStoreNames.contains(tableName);
 }
 
 /**
@@ -107,24 +107,24 @@ export function existTable(tableName, db) {
  * @param {object} data 记录
  */
 export function addRecord(db, tableName, data) {
-	return new Promise(function(resolve, reject) {
-		const request = db.transaction(tableName, 'readwrite')
-			.objectStore(tableName)
-			.add(data);
-		request.onsuccess = function() {
-			db.close();
-			resolve({
-				code: 1000
-			});
-		};
-		request.onerror = function(e) {
-			db.close();
-			reject({
-				code: 0,
-				msg: e.target.error
-			});
-		};
-	});
+  return new Promise(function(resolve, reject) {
+    const request = db.transaction(tableName, 'readwrite')
+      .objectStore(tableName)
+      .add(data);
+    request.onsuccess = function() {
+      db.close();
+      resolve({
+        code: 1000
+      });
+    };
+    request.onerror = function(e) {
+      db.close();
+      reject({
+        code: 0,
+        msg: e.target.error
+      });
+    };
+  });
 }
 
 /**
@@ -133,18 +133,18 @@ export function addRecord(db, tableName, data) {
  * @param {string} tableName
  */
 export function countTableMsg(db, tableName) {
-	return new Promise(function(resolve, reject) {
-		const request = db.transaction(tableName, 'readonly')
-			.objectStore(tableName)
-			.count();
-		request.onsuccess = function(e) {
-			db.close();
-			resolve({
-				code: 1000,
-				data: e.target.result
-			});
-		};
-	});
+  return new Promise(function(resolve, reject) {
+    const request = db.transaction(tableName, 'readonly')
+      .objectStore(tableName)
+      .count();
+    request.onsuccess = function(e) {
+      db.close();
+      resolve({
+        code: 1000,
+        data: e.target.result
+      });
+    };
+  });
 }
 
 /**
@@ -155,28 +155,28 @@ export function countTableMsg(db, tableName) {
  * @param {number} count 数量
  */
 export function getHisMsg(db, tableName, upper, count = 20) {
-	return new Promise(function(resolve, reject) {
-		const lower = (upper - count) > 0 ? (upper - count) : 0;
-		// 开区间，不包含两头
-		const keyRange = IDBKeyRange.bound(lower, upper);
-		let records = [];
-		const request = db.transaction(tableName, 'readonly')
-			.objectStore(tableName)
-			.openCursor(keyRange);
-		request.onsuccess = function(e) {
-			const cursor = e.target.result;
-			if (cursor) {
-				records.push(cursor.value);
-				cursor.continue();
-			} else {
-				db.close();
-				resolve({
-					code: 1000,
-					data: records
-				});
-			}
-		};
-	});
+  return new Promise(function(resolve, reject) {
+    const lower = (upper - count) > 0 ? (upper - count) : 0;
+    // 开区间，不包含两头
+    const keyRange = IDBKeyRange.bound(lower, upper);
+    let records = [];
+    const request = db.transaction(tableName, 'readonly')
+      .objectStore(tableName)
+      .openCursor(keyRange);
+    request.onsuccess = function(e) {
+      const cursor = e.target.result;
+      if (cursor) {
+        records.push(cursor.value);
+        cursor.continue();
+      } else {
+        db.close();
+        resolve({
+          code: 1000,
+          data: records
+        });
+      }
+    };
+  });
 }
 
 /**
@@ -187,15 +187,15 @@ export function getHisMsg(db, tableName, upper, count = 20) {
  * @param {number} timeStamp
  */
 export function deleteDBRecord(db, tableName, timeStamp) {
-	return new Promise(function(resolve, reject) {
-		const request = db.transaction(tableName, 'readwrite')
-			.objectStore(tableName)
-			.delete(timeStamp);
-		request.onsuccess = function() {
-			db.close();
-			resolve({
-				code: 1000
-			});
-		};
-	});
+  return new Promise(function(resolve, reject) {
+    const request = db.transaction(tableName, 'readwrite')
+      .objectStore(tableName)
+      .delete(timeStamp);
+    request.onsuccess = function() {
+      db.close();
+      resolve({
+        code: 1000
+      });
+    };
+  });
 }

@@ -8,12 +8,12 @@
 
 <script>
 export default {
-	name: 'Setting',
-	data() {
-		return {
+  name: 'Setting',
+  data() {
+    return {
 
-		};
-	}
+    };
+  }
 };
 </script>
 

@@ -48,96 +48,96 @@ import activeideaUrl from '@/assets/img/bottom-menu/idea-active.svg';
 import settingUrl from '@/assets/img/bottom-menu/setting.svg';
 import activeSettingUrl from '@/assets/img/bottom-menu/setting-active.svg';
 export default {
-	name: 'BottomMenu',
-	data() {
-		return {
-			msgSrc: activeMsgUrl,
-			ideaSrc: ideaUrl,
-			settingSrc: settingUrl
-		};
-	},
-	computed: {
-		...mapGetters([
-			'selected',
-			'currentUid',
-			'totalUnreadMsgCount'
-		])
-	},
-	methods: {
-		/**
+  name: 'BottomMenu',
+  data() {
+    return {
+      msgSrc: activeMsgUrl,
+      ideaSrc: ideaUrl,
+      settingSrc: settingUrl
+    };
+  },
+  computed: {
+    ...mapGetters([
+      'selected',
+      'currentUid',
+      'totalUnreadMsgCount'
+    ])
+  },
+  methods: {
+    /**
 		 * 切换[消息页]状态
 		 * @param open true表示选中
 		 */
-		toggleMsg(open = true) {
-			if (open) {
-				this.msgSrc = activeMsgUrl;
-				this.toggleIdea(false);
-				this.toggleSetting(false);
-				if (this.allowJump('Chat')) {
-					if (this.selected !== undefined) {
-						// 存在已选中的聊天窗口，显示对应的聊天窗口
-						if (this.allowJump2ChatWindow(this.currentUid)) {
-							this.$router.push(`/home/chat/${this.currentUid}`);
-						}
-					} else {
-						// 当前没有选中的聊天窗口，展示[消息]页即可
-						this.$router.push('/home/chat');
-					}
-				}
-			} else {
-				this.msgSrc = msgUrl;
-			}
-		},
-		/**
+    toggleMsg(open = true) {
+      if (open) {
+        this.msgSrc = activeMsgUrl;
+        this.toggleIdea(false);
+        this.toggleSetting(false);
+        if (this.allowJump('Chat')) {
+          if (this.selected !== undefined) {
+            // 存在已选中的聊天窗口，显示对应的聊天窗口
+            if (this.allowJump2ChatWindow(this.currentUid)) {
+              this.$router.push(`/home/chat/${this.currentUid}`);
+            }
+          } else {
+            // 当前没有选中的聊天窗口，展示[消息]页即可
+            this.$router.push('/home/chat');
+          }
+        }
+      } else {
+        this.msgSrc = msgUrl;
+      }
+    },
+    /**
 		 * 切换[想法页]状态
 		 * @param open true表示打开
 		 */
-		toggleIdea(open = true) {
-			if (open) {
-				this.ideaSrc = activeideaUrl;
-				this.toggleMsg(false);
-				this.toggleSetting(false);
-				if (this.allowJump('Idea')) {
-					this.$router.push('/home/idea');
-				}
-			} else {
-				this.ideaSrc = ideaUrl;
-			}
-		},
-		/**
+    toggleIdea(open = true) {
+      if (open) {
+        this.ideaSrc = activeideaUrl;
+        this.toggleMsg(false);
+        this.toggleSetting(false);
+        if (this.allowJump('Idea')) {
+          this.$router.push('/home/idea');
+        }
+      } else {
+        this.ideaSrc = ideaUrl;
+      }
+    },
+    /**
 		 * 切换[设置页]状态
 		 * @param open true表示打开
 		 */
-		toggleSetting(open = true) {
-			if (open) {
-				this.settingSrc = activeSettingUrl;
-				this.toggleMsg(false);
-				this.toggleIdea(false);
-				if (this.allowJump('Setting')) {
-					this.$router.push('/home/setting');
-				}
-			} else {
-				this.settingSrc = settingUrl;
-			}
-		},
-		/**
+    toggleSetting(open = true) {
+      if (open) {
+        this.settingSrc = activeSettingUrl;
+        this.toggleMsg(false);
+        this.toggleIdea(false);
+        if (this.allowJump('Setting')) {
+          this.$router.push('/home/setting');
+        }
+      } else {
+        this.settingSrc = settingUrl;
+      }
+    },
+    /**
 		 * 判断是否允许跳转
 		 * 如果当前页面与跳转页面一致，则不予跳转
 		 * @param target 跳转的目标路由名称
 		 */
-		allowJump(target) {
-			const { name } = this.$route;
-			return name !== target;
-		},
-		/**
+    allowJump(target) {
+      const { name } = this.$route;
+      return name !== target;
+    },
+    /**
 		 * 判断是否允许跳转至聊天窗口路由
 		 * @param {number} uid 用户id
 		 */
-		allowJump2ChatWindow(uid) {
-			const { path } = this.$route;
-			return path !== `/home/chat/${uid}`;
-		}
-	}
+    allowJump2ChatWindow(uid) {
+      const { path } = this.$route;
+      return path !== `/home/chat/${uid}`;
+    }
+  }
 };
 </script>
 

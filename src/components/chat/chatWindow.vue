@@ -119,259 +119,259 @@ import Emotion from '@/components/chat/emotion';
 import RightClick from '@/components/right-click';
 import { DATABASE_NAME } from '@/utils/constants/db-constant';
 import {
-	getDB,
-	existTable,
-	createChatTable,
-	addRecord,
-	countTableMsg,
-	deleteDBRecord,
-	getLocalDBVersion
+  getDB,
+  existTable,
+  createChatTable,
+  addRecord,
+  countTableMsg,
+  deleteDBRecord,
+  getLocalDBVersion
 } from '@/utils/db/dbUtil';
 export default {
-	name: 'ChatWindow',
-	components: {
-		Emotion, RightClick
-	},
-	data() {
-		return {
-			friendUid: undefined, // 聊天对象的id
-			chatTableName: undefined, // 聊天数据数据存储的表名称
-			msgCount: 0, // 数据总量(查询历史记录需要)
-			tempMsg: {}, // hover的消息(辅助右键菜单)
-			rightClickCommand: [
-				{
-					name: '转发',
-					commandKey: 'forwardMsg'
-				},
-				{
-					name: '删除',
-					commandKey: 'deleteMsg'
-				}
-			], // 右键菜单命令配置
-			msgList: [
-				{
-					Type: 1,
-					Content: '新年快乐！',
-					Timestamp: 1610201109000
-				},
-				{
-					Type: 2,
-					Content: '新年好！',
-					Timestamp: 1610288109000
-				}
-			]
-		};
-	},
-	created() {
-		this.initData();
-		this.checkTableBeforeChat();
-	},
-	methods: {
-		/**
+  name: 'ChatWindow',
+  components: {
+    Emotion, RightClick
+  },
+  data() {
+    return {
+      friendUid: undefined, // 聊天对象的id
+      chatTableName: undefined, // 聊天数据数据存储的表名称
+      msgCount: 0, // 数据总量(查询历史记录需要)
+      tempMsg: {}, // hover的消息(辅助右键菜单)
+      rightClickCommand: [
+        {
+          name: '转发',
+          commandKey: 'forwardMsg'
+        },
+        {
+          name: '删除',
+          commandKey: 'deleteMsg'
+        }
+      ], // 右键菜单命令配置
+      msgList: [
+        {
+          Type: 1,
+          Content: '新年快乐！',
+          Timestamp: 1610201109000
+        },
+        {
+          Type: 2,
+          Content: '新年好！',
+          Timestamp: 1610288109000
+        }
+      ]
+    };
+  },
+  created() {
+    this.initData();
+    this.checkTableBeforeChat();
+  },
+  methods: {
+    /**
 		 * 初始化聊天组件基本数据
 		 */
-		initData() {
-			const { Uid } = this.$route.params;
-			this.friendUid = Number(Uid);
-			this.chatTableName = `${this.friendUid}-chat`;
-		},
+    initData() {
+      const { Uid } = this.$route.params;
+      this.friendUid = Number(Uid);
+      this.chatTableName = `${this.friendUid}-chat`;
+    },
 
-		/**
+    /**
 		 * 发送消息
 		 */
-		sendMsg() {
-			const msg = this.$refs.enterMsg.innerHTML;
-			const timestamp = (new Date()).getTime();
-			if (!msg) {
-				return;
-			}
-			// 本地存储消息
-			this.storageData(this.chatTableName, msg, timestamp);
-			// 更新页面聊天数据
-			this.updateChatMsgList(msg, timestamp);
-			// 更新左侧预览列表数据
-			this.updatePreviewMsg(msg, timestamp);
-			// 清空输入框
-			this.clearMsg();
-			// 页面滚动至最新的那条信息的位置
-			this.toLatestMsg();
-		},
+    sendMsg() {
+      const msg = this.$refs.enterMsg.innerHTML;
+      const timestamp = (new Date()).getTime();
+      if (!msg) {
+        return;
+      }
+      // 本地存储消息
+      this.storageData(this.chatTableName, msg, timestamp);
+      // 更新页面聊天数据
+      this.updateChatMsgList(msg, timestamp);
+      // 更新左侧预览列表数据
+      this.updatePreviewMsg(msg, timestamp);
+      // 清空输入框
+      this.clearMsg();
+      // 页面滚动至最新的那条信息的位置
+      this.toLatestMsg();
+    },
 
-		/**
+    /**
 		 * 本地保存用户发送的消息
 		 * @param {string} tableName 存储消息的数据表名称
 		 * @param {string} msg 消息
 		 * @param {number} timestamp 消息产生时间(ms)
 		 */
-		storageData(tableName, msg, timestamp) {
-			const data = {
-				Type: 2,
-				Content: msg,
-				Timestamp: timestamp
-			};
-			const dbVersion = getLocalDBVersion();
-			getDB(DATABASE_NAME, dbVersion).then(
-				(db) => {
-					addRecord(db, tableName, data);
-				}
-			);
-		},
+    storageData(tableName, msg, timestamp) {
+      const data = {
+        Type: 2,
+        Content: msg,
+        Timestamp: timestamp
+      };
+      const dbVersion = getLocalDBVersion();
+      getDB(DATABASE_NAME, dbVersion).then(
+        (db) => {
+          addRecord(db, tableName, data);
+        }
+      );
+    },
 
-		updateCount() {
-			this.msgCount += 1;
-		},
+    updateCount() {
+      this.msgCount += 1;
+    },
 
-		/**
+    /**
 		 * 向此聊天窗口新增一条消息
 		 * @param {} Content 新的消息内容
 		 * @param {number} Timestamp 消息产生时间(ms)
 		 */
-		updateChatMsgList(Content, Timestamp) {
-			const msg = {
-				Type: 2,
-				Content,
-				Timestamp
-			};
-			this.msgList.push(msg);
-		},
+    updateChatMsgList(Content, Timestamp) {
+      const msg = {
+        Type: 2,
+        Content,
+        Timestamp
+      };
+      this.msgList.push(msg);
+    },
 
-		/**
+    /**
 		 * 更新预览消息的信息
 		 * @param {} Msg 新的消息内容
 		 * @param {number} Timestamp 消息产生时间(ms)
 		 */
-		updatePreviewMsg(Msg, Timestamp) {
-			const previewMsg = {
-				Uid: this.friendUid,
-				Msg,
-				Timestamp
-			};
-			this.$store.dispatch('previewMsg/updateMsg', previewMsg);
-			this.$store.dispatch('previewMsg/updateSelected', 0);
-		},
+    updatePreviewMsg(Msg, Timestamp) {
+      const previewMsg = {
+        Uid: this.friendUid,
+        Msg,
+        Timestamp
+      };
+      this.$store.dispatch('previewMsg/updateMsg', previewMsg);
+      this.$store.dispatch('previewMsg/updateSelected', 0);
+    },
 
-		/**
+    /**
 		 * 清空消息
 		 */
-		clearMsg() {
-			this.$refs.enterMsg.innerHTML = '';
-		},
+    clearMsg() {
+      this.$refs.enterMsg.innerHTML = '';
+    },
 
-		/**
+    /**
 		 * 选择表情
 		 * @param {number} index 表情的索引
 		 * @param {string} src 表情的地址
 		 */
-		chooseEmotion(index, src) {
-			document.getElementById('msg-box').focus();
-			const imgElement = `<img src="${src}" width="24" height="24">`;
-			document.execCommand('insertHTML', false, imgElement);
-		},
+    chooseEmotion(index, src) {
+      document.getElementById('msg-box').focus();
+      const imgElement = `<img src="${src}" width="24" height="24">`;
+      document.execCommand('insertHTML', false, imgElement);
+    },
 
-		/**
+    /**
 		 * 页面滚动至最新的那条消息
 		 */
-		toLatestMsg() {
-			const el = document.getElementById('msg-info');
-			setTimeout(function() {
-				const top = el.scrollHeight;
-				el.scroll({ top, behavior: 'smooth' });
-			});
-		},
+    toLatestMsg() {
+      const el = document.getElementById('msg-info');
+      setTimeout(function() {
+        const top = el.scrollHeight;
+        el.scroll({ top, behavior: 'smooth' });
+      });
+    },
 
-		/**
+    /**
 		 * 判断是否存在聊天的数据表
 		 * 没有则新建
 		 */
-		checkTableBeforeChat() {
-			const uid = this.friendUid;
-			const tableName = `${uid}-chat`;
-			const dbVersion = getLocalDBVersion();
-			getDB(DATABASE_NAME, dbVersion).then(
-				(db) => {
-					// 表不存在，新建数据表
-					if (!existTable(tableName, db)) {
-						db.close();
-						const currentVersion = db.version;
-						createChatTable(currentVersion, uid);
-					} else {
-						// 表已存在，获取当前表中数据量
-						countTableMsg(db, tableName).then(
-							(res) => {
-								this.msgCount = res.data;
-							}
-						);
-					}
-				}
-			);
-		},
-		/**
+    checkTableBeforeChat() {
+      const uid = this.friendUid;
+      const tableName = `${uid}-chat`;
+      const dbVersion = getLocalDBVersion();
+      getDB(DATABASE_NAME, dbVersion).then(
+        (db) => {
+          // 表不存在，新建数据表
+          if (!existTable(tableName, db)) {
+            db.close();
+            const currentVersion = db.version;
+            createChatTable(currentVersion, uid);
+          } else {
+            // 表已存在，获取当前表中数据量
+            countTableMsg(db, tableName).then(
+              (res) => {
+                this.msgCount = res.data;
+              }
+            );
+          }
+        }
+      );
+    },
+    /**
 		 * 打开右键菜单
 		 */
-		rightClick(e) {
-			const { pageX, pageY } = e;
-			this.$refs.rightClick.open(pageX, pageY, 64);
-			e.preventDefault();
-		},
-		/**
+    rightClick(e) {
+      const { pageX, pageY } = e;
+      this.$refs.rightClick.open(pageX, pageY, 64);
+      e.preventDefault();
+    },
+    /**
 		 * 记录hover时的消息
 		 * 辅助右键菜单的功能
 		 * @param msg hover选中的消息
 		 */
-		recordMsg(msg) {
-			if (this.tempMsg.Type + this.tempMsg.Timestamp !== msg.Type + msg.Timestamp) {
-				this.tempMsg = msg;
-			}
-		},
-		/**
+    recordMsg(msg) {
+      if (this.tempMsg.Type + this.tempMsg.Timestamp !== msg.Type + msg.Timestamp) {
+        this.tempMsg = msg;
+      }
+    },
+    /**
 		 * 处理右键菜单的事件
 		 * @param {string} commandKey 要执行的命令
 		 */
-		handleExecCommand(commandKey) {
-			if (commandKey && this.tempMsg) {
-				if (commandKey === 'forwardMsg') {
-					// 暂未实现
-				}
-				if (commandKey === 'deleteMsg') {
-					this.deleteMsg(this.tempMsg);
-				}
-			}
-		},
-		/**
+    handleExecCommand(commandKey) {
+      if (commandKey && this.tempMsg) {
+        if (commandKey === 'forwardMsg') {
+          // 暂未实现
+        }
+        if (commandKey === 'deleteMsg') {
+          this.deleteMsg(this.tempMsg);
+        }
+      }
+    },
+    /**
 		 * 删除指定的聊天记录
 		 * @param {object} msg 要删除的消息
 		 */
-		deleteMsg(msg) {
-			const { Timestamp } = msg;
-			const tableName = `${this.friendUid}-chat`;
-			const dbVersion = getLocalDBVersion();
-			let needDelete = false;
-			for (let i = 0; i < this.msgList.length; i++) {
-				if (this.msgList[i].Type === msg.Type && this.msgList[i].Timestamp === msg.Timestamp) {
-					needDelete = true;
-					if (i === this.msgList.length - 1 && this.msgList.length > 1) {
-						// 删除的是页面最后一条记录，删除后，需要更新左侧预览消息内容为上一条消息
-						const newPreviewMsg = {
-							Uid: this.friendUid,
-							Msg: this.msgList[i - 1].Content,
-							Timestamp: this.msgList[i - 1].Timestamp
-						};
-						this.$store.dispatch('previewMsg/changeMsg', newPreviewMsg);
-					}
-					this.msgList.splice(i, 1);
-					break;
-				}
-			}
-			if (needDelete) {
-				getDB(DATABASE_NAME, dbVersion).then(
-					(db) => {
-						deleteDBRecord(db, tableName, Timestamp);
-					}
-				);
-			}
-		}
+    deleteMsg(msg) {
+      const { Timestamp } = msg;
+      const tableName = `${this.friendUid}-chat`;
+      const dbVersion = getLocalDBVersion();
+      let needDelete = false;
+      for (let i = 0; i < this.msgList.length; i++) {
+        if (this.msgList[i].Type === msg.Type && this.msgList[i].Timestamp === msg.Timestamp) {
+          needDelete = true;
+          if (i === this.msgList.length - 1 && this.msgList.length > 1) {
+            // 删除的是页面最后一条记录，删除后，需要更新左侧预览消息内容为上一条消息
+            const newPreviewMsg = {
+              Uid: this.friendUid,
+              Msg: this.msgList[i - 1].Content,
+              Timestamp: this.msgList[i - 1].Timestamp
+            };
+            this.$store.dispatch('previewMsg/changeMsg', newPreviewMsg);
+          }
+          this.msgList.splice(i, 1);
+          break;
+        }
+      }
+      if (needDelete) {
+        getDB(DATABASE_NAME, dbVersion).then(
+          (db) => {
+            deleteDBRecord(db, tableName, Timestamp);
+          }
+        );
+      }
+    }
 
-	}
+  }
 };
 </script>
 

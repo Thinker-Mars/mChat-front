@@ -49,109 +49,109 @@
 import { mapGetters } from 'vuex';
 import RightClick from '@/components/right-click';
 export default {
-	name: 'Chat',
-	components: {
-		RightClick
-	},
-	data() {
-		return {
-			/** 右键菜单命令配置 */
-			rightClickCommand: [
-				{
-					name: '置顶',
-					commandKey: 'placedTop'
-				},
-				{
-					name: '删除聊天',
-					commandKey: 'deletePreviewMsg'
-				}
-			],
-			tempPreviewMsg: {}
-		};
-	},
-	computed: {
-		...mapGetters([
-			'previewMsgList',
-			'selected'
-		])
-	},
-	methods: {
-		/**
+  name: 'Chat',
+  components: {
+    RightClick
+  },
+  data() {
+    return {
+      /** 右键菜单命令配置 */
+      rightClickCommand: [
+        {
+          name: '置顶',
+          commandKey: 'placedTop'
+        },
+        {
+          name: '删除聊天',
+          commandKey: 'deletePreviewMsg'
+        }
+      ],
+      tempPreviewMsg: {}
+    };
+  },
+  computed: {
+    ...mapGetters([
+      'previewMsgList',
+      'selected'
+    ])
+  },
+  methods: {
+    /**
 		 * 删除某预览窗口
 		 * @param {number} Uid 用户唯一id
 		 */
-		deletePreview(Uid) {
-			this.$store.dispatch('previewMsg/deleteMsg', Uid);
-		},
-		/**
+    deletePreview(Uid) {
+      this.$store.dispatch('previewMsg/deleteMsg', Uid);
+    },
+    /**
 		 * 置顶某预览窗口
 		 * @param {number} Uid 用户唯一id
 		 */
-		placedTopPreview(Uid) {
-			this.$store.dispatch('previewMsg/placedTopMsg', Uid);
-		},
-		/**
+    placedTopPreview(Uid) {
+      this.$store.dispatch('previewMsg/placedTopMsg', Uid);
+    },
+    /**
 		 * 点击[预览]，查看消息
 		 * @param {number} index 该条预览信息的索引
 		 * @param {number} Uid 预览消息的发送者id
 		 */
-		checkMsgDetail(index, Uid) {
-			// 更新当前选中窗口信息
-			this.$store.dispatch('previewMsg/updateSelected', index);
-			// 更新当前聊天对象uid
-			this.$store.dispatch('previewMsg/updateCurrentUid', Uid);
-			// 清除未读消息(如果有的话)
-			this.$store.dispatch('previewMsg/confirmMsg', Uid);
-			if (this.allowJump(Uid)) {
-				// 查看消息
-				this.$router.push(`/home/chat/${Uid}`);
-			}
-		},
-		/**
+    checkMsgDetail(index, Uid) {
+      // 更新当前选中窗口信息
+      this.$store.dispatch('previewMsg/updateSelected', index);
+      // 更新当前聊天对象uid
+      this.$store.dispatch('previewMsg/updateCurrentUid', Uid);
+      // 清除未读消息(如果有的话)
+      this.$store.dispatch('previewMsg/confirmMsg', Uid);
+      if (this.allowJump(Uid)) {
+        // 查看消息
+        this.$router.push(`/home/chat/${Uid}`);
+      }
+    },
+    /**
 		 * 判断是否允许跳转
 		 * 避免重复跳转同一路由
 		 * @param {number} Uid 用户id
 		 */
-		allowJump(Uid) {
-			const { path } = this.$route;
-			return path !== `/home/chat/${Uid}`;
-		},
-		/*
+    allowJump(Uid) {
+      const { path } = this.$route;
+      return path !== `/home/chat/${Uid}`;
+    },
+    /*
 		 * 打开右键菜单
 		 */
-		rightClick(e) {
-			const { pageX, pageY } = e;
-			this.$refs.rightClick.open(pageX, pageY);
-			e.preventDefault();
-		},
-		/**
+    rightClick(e) {
+      const { pageX, pageY } = e;
+      this.$refs.rightClick.open(pageX, pageY);
+      e.preventDefault();
+    },
+    /**
 		 * 处理右键菜单的事件
 		 * @param {string} commandKey 要执行的命令
 		 */
-		handleExecCommand(commandKey) {
-			if (commandKey && this.tempPreviewMsg) {
-				if (commandKey === 'placedTop') {
-					// 置顶
-					this.placedTopPreview(this.tempPreviewMsg.Uid);
-				}
-				if (commandKey === 'deletePreviewMsg') {
-					// 删除聊天
-					this.deletePreview(this.tempPreviewMsg.Uid);
-				}
-			}
-		},
-		/**
+    handleExecCommand(commandKey) {
+      if (commandKey && this.tempPreviewMsg) {
+        if (commandKey === 'placedTop') {
+          // 置顶
+          this.placedTopPreview(this.tempPreviewMsg.Uid);
+        }
+        if (commandKey === 'deletePreviewMsg') {
+          // 删除聊天
+          this.deletePreview(this.tempPreviewMsg.Uid);
+        }
+      }
+    },
+    /**
 		 * 临时记录hover的预览消息
 		 * 辅助右键菜单的功能
 		 * @param previewMsg hover选中的预览消息内容
 		 */
-		recordPreviewMsg(previewMsg) {
-			if (previewMsg.Uid !== this.tempPreviewMsg.Uid) {
-				// 避免重复记录
-				this.tempPreviewMsg = previewMsg;
-			}
-		}
-	}
+    recordPreviewMsg(previewMsg) {
+      if (previewMsg.Uid !== this.tempPreviewMsg.Uid) {
+        // 避免重复记录
+        this.tempPreviewMsg = previewMsg;
+      }
+    }
+  }
 };
 </script>
 
