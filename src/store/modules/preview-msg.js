@@ -296,14 +296,14 @@ const actions = {
   },
   /**
 	 * 接收到消息
+	 * 当用户在线时，收到消息后触发此行为
 	 */
   receiveMsg({ commit }, data) {
-    const msgCount = data.length;
-    const { Uid } = data[data.length - 1];
+    const { ProducerID, Msg, Timestamp } = data;
     // 更新消息
-    commit('UPDATE_MSG', data[data.length - 1]);
+    commit('UPDATE_MSG', { Uid: ProducerID, Msg, Timestamp });
     // 更新未读消息数
-    commit('CNAHGE_MSG_COUNT', Uid, msgCount);
+    commit('CNAHGE_MSG_COUNT', ProducerID, 1);
   }
 };
 

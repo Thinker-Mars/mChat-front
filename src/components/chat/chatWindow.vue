@@ -115,6 +115,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import Emotion from '@/components/chat/emotion';
 import RightClick from '@/components/right-click';
 import { DATABASE_NAME } from '@/utils/constants/db-constant';
@@ -162,6 +163,11 @@ export default {
       ]
     };
   },
+  computed: {
+    ...mapGetters([
+      'uid'
+    ])
+  },
   created() {
     this.initData();
     this.checkTableBeforeChat();
@@ -191,6 +197,8 @@ export default {
       this.updateChatMsgList(msg, timestamp);
       // 更新左侧预览列表数据
       this.updatePreviewMsg(msg, timestamp);
+      // 将消息发给朋友
+      this.sendToFriend(this.uid, this.friendUid, msg, timestamp);
       // 清空输入框
       this.clearMsg();
       // 页面滚动至最新的那条信息的位置
@@ -215,10 +223,6 @@ export default {
           addRecord(db, tableName, data);
         }
       );
-    },
-
-    updateCount() {
-      this.msgCount += 1;
     },
 
     /**
@@ -255,6 +259,17 @@ export default {
 		 */
     clearMsg() {
       this.$refs.enterMsg.innerHTML = '';
+    },
+
+    /**
+		 * 将消息发给朋友
+		 * @param {Number} ProducerID 消息的生产者uid（即谁发送的消息）
+		 * @param {Number} ConsumerID 消息的消费者uid（即消息要发给谁）
+		 * @param {String} Msg 发送的消息
+		 * @param {Number} Timestamp 消息产生的时间戳
+		 */
+    sendToFriend(ProducerID, ConsumerID, Msg, Timestamp) {
+      this.$store.dispatch('socket/sendMsg', { ProducerID, ConsumerID, Msg, Timestamp });
     },
 
     /**

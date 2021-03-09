@@ -48,7 +48,9 @@ export default {
           that.$store.dispatch('socket/connect').then(() => {
             that.$router.push({ path: '/home/chat' });
           });
-          // that.$router.push({path: "/home/chat"});
+          const { identify } = values;
+          // 暂时以用户输入内容为uid
+          that.$store.dispatch('user/setUID', identify);
         }
       });
     }
