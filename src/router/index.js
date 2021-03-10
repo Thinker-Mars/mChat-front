@@ -42,6 +42,26 @@ const routes = [
           }
         ]
       },
+      /** 好友列表 */
+      {
+        path: 'friend',
+        name: 'Friend',
+        component: () => import('@/views/friend'),
+        meta: {
+          keepAlive: true
+        },
+        children: [
+          /** 好友信息 */
+          {
+            path: ':Uid',
+            name: 'FriendDetail',
+            component: () => import('@/components/friend-detail'),
+            meta: {
+              keepAlive: true
+            }
+          }
+        ]
+      },
       /** 想法 */
       {
         path: 'idea',

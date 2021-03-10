@@ -18,6 +18,16 @@
     </div>
     <div
       class="icon-container"
+      @click="toggleFriend(true)"
+    >
+      <img
+        :src="friendSrc"
+        class="bottom-menu-icon"
+        data-msg="朋友"
+      >
+    </div>
+    <div
+      class="icon-container"
       @click="toggleIdea(true)"
     >
       <img
@@ -47,19 +57,23 @@ import ideaUrl from '@/assets/img/bottom-menu/idea.svg';
 import activeideaUrl from '@/assets/img/bottom-menu/idea-active.svg';
 import settingUrl from '@/assets/img/bottom-menu/setting.svg';
 import activeSettingUrl from '@/assets/img/bottom-menu/setting-active.svg';
+import friendUrl from '@/assets/img/bottom-menu/friend.svg';
+import activeFriendUrl from '@/assets/img/bottom-menu/friend-active.svg';
 export default {
   name: 'BottomMenu',
   data() {
     return {
       msgSrc: activeMsgUrl,
       ideaSrc: ideaUrl,
-      settingSrc: settingUrl
+      settingSrc: settingUrl,
+      friendSrc: friendUrl
     };
   },
   computed: {
     ...mapGetters([
       'selected',
       'currentUid',
+      'friendUid',
       'totalUnreadMsgCount'
     ])
   },
@@ -73,6 +87,7 @@ export default {
         this.msgSrc = activeMsgUrl;
         this.toggleIdea(false);
         this.toggleSetting(false);
+        this.toggleFriend(false);
         if (this.allowJump('Chat')) {
           if (this.selected !== undefined) {
             // 存在已选中的聊天窗口，显示对应的聊天窗口
@@ -97,6 +112,7 @@ export default {
         this.ideaSrc = activeideaUrl;
         this.toggleMsg(false);
         this.toggleSetting(false);
+        this.toggleFriend(false);
         if (this.allowJump('Idea')) {
           this.$router.push('/home/idea');
         }
@@ -113,11 +129,37 @@ export default {
         this.settingSrc = activeSettingUrl;
         this.toggleMsg(false);
         this.toggleIdea(false);
+        this.toggleFriend(false);
         if (this.allowJump('Setting')) {
           this.$router.push('/home/setting');
         }
       } else {
         this.settingSrc = settingUrl;
+      }
+    },
+    /**
+		 * 切换[朋友]状态
+		 * @param open true表示打开
+		 */
+    toggleFriend(open = true) {
+      if (open) {
+        this.friendSrc = activeFriendUrl;
+        this.toggleMsg(false);
+        this.toggleIdea(false);
+        this.toggleSetting(false);
+        if (this.allowJump('Friend')) {
+          if (this.friendUid !== undefined) {
+            // 存在已选中的朋友窗口，显示对应的朋友信息窗口
+            if (this.allowJump2FriendWindow(this.currentUid)) {
+              this.$router.push(`/home/friend/${this.currentUid}`);
+            }
+          } else {
+            // 当前没有选中的聊天窗口，展示[朋友]页即可
+            this.$router.push('/home/friend');
+          }
+        }
+      } else {
+        this.friendSrc = friendUrl;
       }
     },
     /**
@@ -136,6 +178,14 @@ export default {
     allowJump2ChatWindow(uid) {
       const { path } = this.$route;
       return path !== `/home/chat/${uid}`;
+    },
+    /**
+		 * 判断是否允许跳转至朋友信息窗口路由
+		 * @param {number} uid 用户id
+		 */
+    allowJump2FriendWindow(uid) {
+      const { path } = this.$route;
+      return path !== `/home/friend/${uid}`;
     }
   }
 };

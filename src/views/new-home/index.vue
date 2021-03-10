@@ -1,6 +1,6 @@
 <template>
   <div class="new-home">
-    <keep-alive include="Chat,Setting,Idea">
+    <keep-alive include="Chat,friend,Setting,Idea">
       <router-view />
     </keep-alive>
     <bottom-menu />

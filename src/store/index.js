@@ -5,6 +5,7 @@ import user from './modules/user';
 import socket from './modules/socket';
 import getters from './getters';
 import previewMsg from './modules/preview-msg';
+import friend from './modules/friend';
 
 Vue.use(Vuex);
 
@@ -13,7 +14,8 @@ const store = new Vuex.Store({
     app,
     user,
     socket,
-    previewMsg
+    previewMsg,
+    friend
   },
   getters
 });
