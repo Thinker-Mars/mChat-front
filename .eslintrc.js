@@ -51,10 +51,10 @@ module.exports = {
       'after': true
     }],
     // 强制缩进使用tab
-    'indent': ['error', 2, {
-      // 强制 switch 语句中的 case 子句的缩进级别
-      'SwitchCase': 1
-    }],
+    // 'indent': ['error', 2, {
+    //   // 强制 switch 语句中的 case 子句的缩进级别
+    //   'SwitchCase': 1
+    // }],
     // 强制在对象字面量的键和值之间使用一致的空格
     'key-spacing': ['error', {
       // 禁止在对象字面量的键和冒号之间存在空格
