@@ -1,5 +1,5 @@
 const state = {
-  friendUid: undefined, // [朋友]页查看的朋友的uid
+  checkfriendUid: undefined, // [朋友]页查看的朋友的uid
   friendList: [
     {
       Uid: 1000,
@@ -77,6 +77,20 @@ const state = {
       NoteName: '',
       Gender: 1,
       Avatar: ''
+    },
+		{
+      Uid: 1011,
+      NickName: '高崎',
+      NoteName: '',
+      Gender: 1,
+      Avatar: ''
+    },
+		{
+      Uid: 1012,
+      NickName: '123',
+      NoteName: '',
+      Gender: 1,
+      Avatar: ''
     }
   ], // 朋友列表数据
   selected: undefined // 当前选中朋友信息窗口的索引
@@ -87,7 +101,7 @@ const mutations = {
 	 * 保存当前查看的朋友信息的uid
 	 */
   SET_FRIEND_UID: (state, uid) => {
-    state.uid = uid;
+    state.checkfriendUid = uid;
   },
   /**
 	 * 保存当前选中朋友信息窗口的索引
