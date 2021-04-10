@@ -13,7 +13,8 @@
           <div
             v-for="(friendInfo) in groupedFriend.list"
             :key="friendInfo.Uid"
-            class="card"
+            :class="checkfriendUid === friendInfo.Uid ? 'card active' : 'card'"
+            @click="checkFriendDetail(friendInfo.Uid)"
           >
             <div class="img-container">
               <img src="@/assets/img/user/preview.jpg">
@@ -65,7 +66,7 @@ export default {
   computed: {
     ...mapGetters([
       'friendList',
-      'selected'
+      'checkfriendUid'
     ])
   },
 	watch: {
@@ -77,6 +78,9 @@ export default {
 		}
 	},
 	methods: {
+		/**
+		 * 将好友列表按照 备注 | 昵称 首字母 升序排列，分组
+		 */
 		groupFriend(friendList) {
 			const groupedFriendList = [];
 			if (friendList.length === 0) {
@@ -181,6 +185,25 @@ export default {
 					list: [friendInfo]
 				});
 			}
+		},
+		/**
+		 * 查看朋友详情
+		 */
+		checkFriendDetail(friendUid) {
+			// 记录当前查看的朋友详情的uid
+			this.$store.dispatch('friend/setFriendUID', friendUid);
+			if (this.allowJump(friendUid)) {
+				this.$router.push(`/home/friend/${friendUid}`);
+			}
+		},
+		/**
+		 * 判断是否允许跳转
+		 * 避免重复跳转同一路由
+		 * @param {number} 用户id
+		 */
+		allowJump(uid) {
+			const { path } = this.$route;
+      return path !== `/home/friend/${uid}`;
 		}
 	}
 };
@@ -213,7 +236,7 @@ export default {
 	}
 	.similar-group {
 		width: 100%;
-		border-bottom: 1px solid gray;
+		border-bottom: 1px solid #dfdede;
 	}
 	.similar-group:last-child {
 		border-bottom: none;
@@ -224,7 +247,7 @@ export default {
 		line-height: 20px;
 		padding-left: 10px;
 		font-size: 12px;
-		color: gray;
+		color: #bbafab;
 		white-space: nowrap;
 		text-overflow: ellipsis;
 		overflow: hidden;
@@ -250,6 +273,7 @@ export default {
 			white-space: nowrap;
 			text-overflow: ellipsis;
 			overflow: hidden;
+			color: #2d2927;
 		}
 	}
 	.active {

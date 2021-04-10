@@ -73,7 +73,7 @@ export default {
     ...mapGetters([
       'selected',
       'currentUid',
-      'friendUid',
+      'checkfriendUid',
       'totalUnreadMsgCount'
     ])
   },
@@ -148,7 +148,7 @@ export default {
         this.toggleIdea(false);
         this.toggleSetting(false);
         if (this.allowJump('Friend')) {
-          if (this.friendUid !== undefined) {
+          if (this.checkfriendUid !== undefined) {
             // 存在已选中的朋友窗口，显示对应的朋友信息窗口
             if (this.allowJump2FriendWindow(this.currentUid)) {
               this.$router.push(`/home/friend/${this.currentUid}`);

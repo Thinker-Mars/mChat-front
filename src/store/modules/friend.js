@@ -92,8 +92,7 @@ const state = {
       Gender: 1,
       Avatar: ''
     }
-  ], // 朋友列表数据
-  selected: undefined // 当前选中朋友信息窗口的索引
+  ] // 朋友列表数据
 };
 
 const mutations = {
@@ -102,14 +101,6 @@ const mutations = {
 	 */
   SET_FRIEND_UID: (state, uid) => {
     state.checkfriendUid = uid;
-  },
-  /**
-	 * 保存当前选中朋友信息窗口的索引
-	 */
-  SET_SELECTED: (state, index) => {
-    if (state.selected !== index) {
-      state.selected = index;
-    }
   }
 };
 
@@ -119,12 +110,6 @@ const actions = {
 	 */
   setFriendUID({ commit }, uid) {
     commit('SET_FRIEND_UID', uid);
-  },
-  /**
-	 * 保存当前选中朋友信息窗口的索引
-	 */
-  setSelected({ commit }, index) {
-    commit('SET_SELECTED', index);
   }
 };
 

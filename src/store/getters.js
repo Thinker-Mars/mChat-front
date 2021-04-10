@@ -2,7 +2,7 @@ const getters = {
   /** 当前登录用户唯一id */
   uid: state => state.user.uid,
   /** [朋友]页打开的朋友信息的uid */
-  friendUid: state => state.friend.friendUid,
+  checkfriendUid: state => state.friend.checkfriendUid,
   /** 朋友列表 */
   friendList: state => state.friend.friendList,
   /** socket连接实例 */
