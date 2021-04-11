@@ -2,13 +2,19 @@
   <div class="friend-detail">
     <div class="first-impression">
       <div class="user-baseinfo">
-        <span class="nickName">Cone</span>
+        <span class="nickName">{{ friendInfo.NickName }}</span>
         <img
+          v-if="friendInfo.Gender === 1"
           class="icon-gender top-4"
           src="@/assets/img/system/male.svg"
         >
+        <img
+          v-if="friendInfo.Gender === 2"
+          class="icon-gender top-4"
+          src="@/assets/img/system/female.svg"
+        >
         <div class="signature">
-          未知全貌，不予置评
+          {{ friendInfo.Motto }}
         </div>
       </div>
       <div class="user-avatar">
@@ -21,7 +27,7 @@
           备 注
         </div>
         <div class="value">
-          Cone
+          {{ friendInfo.NoteName }}
         </div>
       </div>
       <div class="content">
@@ -29,23 +35,15 @@
           地 区
         </div>
         <div class="value">
-          爱尔兰奥法利
+          {{ friendInfo.Home }}
         </div>
       </div>
       <div class="content">
         <div class="name">
-          微信号
+          UID
         </div>
         <div class="value">
-          Thinker-Mars
-        </div>
-      </div>
-      <div class="content">
-        <div class="name">
-          来 源
-        </div>
-        <div class="value">
-          通过手机通讯录添加
+          {{ friendInfo.Uid }}
         </div>
       </div>
     </div>
@@ -56,13 +54,43 @@
 </template>
 
 <script>
+import { getDB, getDataByKey, getLocalDBVersion } from '@/utils/db/dbUtil';
+import { DATABASE_NAME, TABLE_LIST } from '@/utils/constants/db-constant';
 export default {
   name: 'FriendDetail',
   data() {
     return {
-
+			// 好友的id
+			friendUid: undefined,
+			// 好友信息
+			friendInfo: {}
     };
-  }
+  },
+	created() {
+		this.init();
+	},
+	methods: {
+		init() {
+			const { Uid } = this.$route.params;
+      this.friendUid = Number(Uid);
+			this.getFriendInfo();
+		},
+		/**
+		 * 获取好友信息
+		 */
+		getFriendInfo() {
+			const dbVersion = getLocalDBVersion();
+			getDB(DATABASE_NAME, dbVersion).then(
+        (db) => {
+					getDataByKey(db, TABLE_LIST.FriendInfo, this.friendUid).then(
+						(res) => {
+							this.friendInfo = res.data;
+						}
+					);
+        }
+      );
+		}
+	}
 };
 </script>
 

@@ -3,7 +3,7 @@
   <div class="chatWindow">
     <!-- 聊天对象名称 -->
     <div class="name-box">
-      <span class="name">Cone</span>
+      <span class="name">{{ friendInfo.NoteName || friendInfo.NickName }}</span>
     </div>
     <div
       id="msg-info"
@@ -53,32 +53,6 @@
           </div>
         </div>
       </div>
-      <!-- <div class="receive-box">
-				<div class="time-box">
-					<span class="time">15:41</span>
-				</div>
-				<div class="receive-msg-box">
-					<div class="chat-user-img">
-						<img src="@/assets/img/user/preview.jpg">
-					</div>
-					<div class="receiver-outter">
-						<div class="left-arrow"></div>
-						<span class="receive-msg">新年快乐！</span>
-					</div>
-				</div>
-			</div> -->
-      <!-- <div class="sendout-box">
-				<div class="time-box">
-					<span class="time">10:38</span>
-				</div>
-				<div class="send-msg-box">
-					<span class="send-msg">新年好</span>
-					<div class="chat-user-img">
-						<div class="right-arrow"></div>
-						<img src="@/assets/img/user/cone.jpg">
-					</div>
-				</div>
-			</div> -->
     </div>
     <!-- 消息编辑区 -->
     <div class="enter-msg">
@@ -118,7 +92,7 @@
 import { mapGetters } from 'vuex';
 import Emotion from '@/components/chat/emotion';
 import RightClick from '@/components/right-click';
-import { DATABASE_NAME } from '@/utils/constants/db-constant';
+import { DATABASE_NAME, TABLE_LIST } from '@/utils/constants/db-constant';
 import {
   getDB,
   existTable,
@@ -126,7 +100,8 @@ import {
   addRecord,
   countTableMsg,
   deleteDBRecord,
-  getLocalDBVersion
+  getLocalDBVersion,
+	getDataByKey
 } from '@/utils/db/dbUtil';
 export default {
   name: 'ChatWindow',
@@ -137,6 +112,7 @@ export default {
     return {
       friendUid: undefined, // 聊天对象的id
       chatTableName: undefined, // 聊天数据数据存储的表名称
+			friendInfo: {}, // 聊天对象的信息
       msgCount: 0, // 数据总量(查询历史记录需要)
       tempMsg: {}, // hover的消息(辅助右键菜单)
       rightClickCommand: [
@@ -180,8 +156,23 @@ export default {
       const { Uid } = this.$route.params;
       this.friendUid = Number(Uid);
       this.chatTableName = `${this.friendUid}-chat`;
+			this.initFriendInfo();
     },
-
+		/**
+		 * 根据uid，获取好友信息
+		 */
+		initFriendInfo() {
+			const dbVersion = getLocalDBVersion();
+			getDB(DATABASE_NAME, dbVersion).then(
+        (db) => {
+					getDataByKey(db, TABLE_LIST.FriendInfo, this.friendUid).then(
+						(res) => {
+							this.friendInfo = res.data;
+						}
+					);
+        }
+      );
+		},
     /**
 		 * 发送消息
 		 */

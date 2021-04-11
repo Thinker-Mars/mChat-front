@@ -39,29 +39,36 @@ export function updateLocalDBVersion(dbVersion) {
 /**
  * 初始化数据库
  */
-export function initDB(dbName, dbVersion) {
-  const request = window.indexedDB.open(dbName, dbVersion);
-  request.onupgradeneeded = function(e) {
-    updateLocalDBVersion(dbVersion);
-    const db = e.target.result;
-    for (const tableName in TABLE_LIST) {
-      if (!db.objectStoreNames.contains(tableName)) {
-        const table = Tables[tableName];
-        const optionalParameters = {};
-        if (table.keyPath) {
-          optionalParameters['keyPath'] = table.keyPath;
-        }
-        if (table.autoIncrement) {
-          optionalParameters['autoIncrement'] = table.autoIncrement;
-        }
-        const objectStore = db.createObjectStore(tableName, optionalParameters);
-        for (const column in table.columns) {
-          objectStore.createIndex(column, column, { unique: table.columns[column].unique });
-        }
-      }
-    }
-    db.close();
-  };
+export function initDB(dbName) {
+	return new Promise((resolve, reject) => {
+		const dbVersion = getLocalDBVersion();
+		const request = window.indexedDB.open(dbName, dbVersion);
+		request.onupgradeneeded = function(e) {
+			updateLocalDBVersion(dbVersion);
+			const db = e.target.result;
+			for (const tableName in TABLE_LIST) {
+				if (!db.objectStoreNames.contains(tableName)) {
+					const table = Tables[tableName];
+					const optionalParameters = {};
+					if (table.keyPath) {
+						optionalParameters['keyPath'] = table.keyPath;
+					}
+					if (table.autoIncrement) {
+						optionalParameters['autoIncrement'] = table.autoIncrement;
+					}
+					const objectStore = db.createObjectStore(tableName, optionalParameters);
+					for (const column in table.columns) {
+						objectStore.createIndex(column, column, { unique: table.columns[column].unique });
+					}
+				}
+			}
+			db.close();
+			resolve();
+		};
+		request.onsuccess = function() {
+			resolve();
+		};
+	});
 }
 
 /**
@@ -128,6 +135,39 @@ export function addRecord(db, tableName, data) {
 }
 
 /**
+ * 清空指定的表中的数据
+ * @param {IDBDatabase} db
+ * @param {string} tableName 存储的表名称
+ */
+export function truncateTable(db, tableName) {
+	return new Promise((resolve, reject) => {
+		const request = db.transaction(tableName, 'readwrite')
+		.objectStore(tableName)
+		.clear();
+		request.onsuccess = function() {
+      db.close();
+      resolve({
+        code: 1000
+      });
+    };
+	});
+}
+
+/**
+ * 批量新增数据
+ * @param {string} dbName 数据库名称
+ * @param {number} version 数据库版本
+ * @param {string} tableName 存储的表名称
+ * @param {array} data 要新增的数据
+ */
+export function patchAddRecord(db, tableName, data) {
+	const objectStore = db.transaction(tableName, 'readwrite').objectStore(tableName);
+	data.forEach((item) => {
+		objectStore.add(item);
+	});
+}
+
+/**
  * 获取某张表中的数据量
  * @param {IDBDatabase} db
  * @param {string} tableName
@@ -159,7 +199,7 @@ export function getHisMsg(db, tableName, upper, count = 20) {
     const lower = (upper - count) > 0 ? (upper - count) : 0;
     // 开区间，不包含两头
     const keyRange = IDBKeyRange.bound(lower, upper);
-    let records = [];
+    const records = [];
     const request = db.transaction(tableName, 'readonly')
       .objectStore(tableName)
       .openCursor(keyRange);
@@ -198,4 +238,25 @@ export function deleteDBRecord(db, tableName, timeStamp) {
       });
     };
   });
+}
+
+/**
+ * 获取 [db]--[tableName]下，主键为 [key] 的某条记录
+ * @param {IDBDatabase} db
+ * @param {string} tableName
+ * @param {string} key
+ */
+export function getDataByKey(db, tableName, key) {
+	return new Promise((resolve, reject) => {
+		const request = db.transaction(tableName)
+		.objectStore(tableName)
+		.get(key);
+		request.onsuccess = function(e) {
+      db.close();
+      resolve({
+        code: 1000,
+				data: e.target.result
+      });
+    };
+	});
 }

@@ -21,7 +21,7 @@
           </div>
           <div class="msg-box">
             <div class="top">
-              <span class="name">Cone</span>
+              <span class="name">Lucky</span>
               <span class="time">{{ tellTime(preview.Timestamp, 1) }}</span>
             </div>
             <div

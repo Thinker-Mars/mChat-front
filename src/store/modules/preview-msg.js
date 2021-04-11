@@ -11,76 +11,28 @@ const state = {
 	 */
   msgList: [
     {
-      Uid: 1,
-      Msg: '新年好',
-      UnReadMsgCount: 4,
+      Uid: 1101,
+      Msg: '来自草莓的消息',
+      UnReadMsgCount: 1,
       Timestamp: 1610287509000
     },
     {
-      Uid: 2,
-      Msg: '你在干嘛呢',
+      Uid: 1102,
+      Msg: '来自Lucky的消息',
       UnReadMsgCount: 1,
       Timestamp: 1609571539943
     },
     {
-      Uid: 3,
-      Msg: '吃过了吗？',
+      Uid: 1103,
+      Msg: '来自大壮的消息',
       UnReadMsgCount: 0,
       Timestamp: 1609571539944
     },
     {
-      Uid: 4,
-      Msg: '新年好',
+      Uid: 1104,
+      Msg: '来自小明的消息',
       UnReadMsgCount: 0,
       Timestamp: 1609571539945
-    },
-    {
-      Uid: 5,
-      Msg: '新年好',
-      UnReadMsgCount: 0,
-      Timestamp: 1609571539946
-    },
-    {
-      Uid: 6,
-      Msg: '新年好',
-      UnReadMsgCount: 0,
-      Timestamp: 1609571539947
-    },
-    {
-      Uid: 7,
-      Msg: '新年好',
-      UnReadMsgCount: 0,
-      Timestamp: 1609571539948
-    },
-    {
-      Uid: 8,
-      Msg: '新年好',
-      UnReadMsgCount: 0,
-      Timestamp: 1609571539949
-    },
-    {
-      Uid: 9,
-      Msg: '新年好',
-      UnReadMsgCount: 0,
-      Timestamp: 1609571539950
-    },
-    {
-      Uid: 10,
-      Msg: '新年好',
-      UnReadMsgCount: 0,
-      Timestamp: 1609571539951
-    },
-    {
-      Uid: 11,
-      Msg: '新年好',
-      UnReadMsgCount: 0,
-      Timestamp: 1609571539952
-    },
-    {
-      Uid: 12,
-      Msg: '新年好',
-      UnReadMsgCount: 0,
-      Timestamp: 1609571539953
     }
   ],
   /**
@@ -94,7 +46,7 @@ const state = {
   /**
 	 * 预览列表未读消息总数
 	 */
-  totalUnreadMsgCount: 5
+  totalUnreadMsgCount: 2
 };
 
 const mutations = {
@@ -107,7 +59,7 @@ const mutations = {
 	 * @param {number} Timestamp 消息产生的时间
 	 */
   UPDATE_MSG: (state, updateMsg) => {
-    let { msgList } = state;
+    const { msgList } = state;
     const { Uid, Msg, Timestamp } = updateMsg;
     // 已有窗口就更新消息
     for (let i = 0; i < msgList.length; i++) {
@@ -126,7 +78,7 @@ const mutations = {
 	 * @param {object} changeMsg
 	 */
   CHANGE_MSG: (state, changeMsg) => {
-    let { msgList } = state;
+    const { msgList } = state;
     const { Uid, Msg, Timestamp } = changeMsg;
     for (let i = 0; i < msgList.length; i++) {
       if (msgList[i].Uid === Uid) {
@@ -142,7 +94,7 @@ const mutations = {
 	 * @param {object} addMsg 消息对象(内容参考上面)
 	 */
   ADD_MSG: (state, addMsg) => {
-    let { msgList } = state;
+    const { msgList } = state;
     const { Uid, Msg, Timestamp } = addMsg;
     msgList.unshift({ Uid, Msg, Timestamp });
   },
@@ -152,7 +104,7 @@ const mutations = {
 	 * @param {number} uid 要删除消息的uid
 	 */
   DELETE_MSG: (state, uid) => {
-    let { msgList } = state;
+    const { msgList } = state;
     for (let i = 0; i < msgList.length; i++) {
       if (msgList[i].Uid === uid) {
         msgList.splice(i, 1);
@@ -175,7 +127,7 @@ const mutations = {
 	 * @param {number} uid 要置顶的消息的uid
 	 */
   PLACED_TOP_MSG: (state, uid) => {
-    let { msgList } = state;
+    const { msgList } = state;
     for (let i = 0; i < msgList.length; i++) {
       if (msgList[i].Uid === uid) {
         const copyMsg = msgList.splice(i, 1);
@@ -220,7 +172,7 @@ const mutations = {
 	 * @param {number} uid 当前聊天对象的uid
 	 */
   CONFIRM_MSG: (state, uid) => {
-    let { msgList } = state;
+    const { msgList } = state;
     for (let i = 0; i < msgList.length; i++) {
       if (msgList[i].Uid === uid && msgList[i].UnReadMsgCount !== 0) {
         const msgCount = msgList[i].UnReadMsgCount;
@@ -236,7 +188,7 @@ const mutations = {
     const { currentUid } = state;
     // 当前打开窗口不是新消息来源者的时候，才累加未读消息数
     if (currentUid !== uid) {
-      let { msgList } = state;
+      const { msgList } = state;
       for (let i = 0; i < msgList.length; i++) {
         if (msgList[i].Uid === uid) {
           msgList[i].UnReadMsgCount += msgCount;

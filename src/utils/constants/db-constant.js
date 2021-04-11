@@ -21,13 +21,13 @@ export const TABLE_LIST = {
   /**
 	 * 记录个人信息
 	 */
-  UserInfo: 'userinfo',
+  UserInfo: 'UserInfo',
   /**
 	 * 记录好友的信息
 	 */
-  FriendInfo: 'friendinfo',
+  FriendInfo: 'FriendInfo',
   /**
 	 * [消息页]左侧-预览消息列表信息
 	 */
-  PreviewList: 'previewlist'
+  PreviewList: 'PreviewList'
 };

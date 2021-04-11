@@ -19,8 +19,17 @@ const FriendInfo = {
     Avatar: {
       remark: '头像',
       unique: false
-    }
-  }
+    },
+		Home: {
+			remark: '地区',
+      unique: false
+		},
+		Motto: {
+			remark: '座右铭',
+      unique: false
+		}
+  },
+	keyPath: 'Uid'
 };
 
 export default FriendInfo;

@@ -11,13 +11,20 @@
 <script>
 import BottomMenu from './bottom-menu';
 import UserProfile from './user-profile';
-import { initDB, getLocalDBVersion } from '@/utils/db/dbUtil';
-import { DATABASE_NAME } from '@/utils/constants/db-constant';
+import { getDB, initDB, patchAddRecord, getLocalDBVersion, truncateTable } from '@/utils/db/dbUtil';
+import { DATABASE_NAME, TABLE_LIST } from '@/utils/constants/db-constant';
+import friendList from './mock-friendlist';
+import { mapGetters } from 'vuex';
 export default {
   name: 'NewHome',
   components: {
     BottomMenu,
     UserProfile
+  },
+	computed: {
+    ...mapGetters([
+      'uid'
+    ])
   },
   created() {
     this.init();
@@ -25,12 +32,52 @@ export default {
   },
   methods: {
     init() {
-      const dbVersion = getLocalDBVersion();
-      initDB(DATABASE_NAME, dbVersion);
-      this.initSocket();
+      this.initDatabase();
+      // this.initSocket();
     },
+		initDatabase() {
+			initDB(DATABASE_NAME).then(
+				() => {
+					// 调用接口，获取当前登录用户的好友信息，存入vuex，并写入indexeddb，数据暂时mock
+					this.$store.dispatch('friend/setFriendList', JSON.parse(JSON.stringify(friendList)));
+					this.initFriendList(friendList);
+				}
+			);
+		},
+		/**
+		 * 初始化好友列表
+		 */
+		initFriendList(friendList) {
+			this.clearFriendList().then(
+				() => {
+					const dbVersion = getLocalDBVersion();
+					getDB(DATABASE_NAME, dbVersion).then(
+						(db) => {
+							patchAddRecord(db, TABLE_LIST.FriendInfo, JSON.parse(JSON.stringify(friendList)));
+						}
+					);
+				}
+			);
+		},
+		/**
+		 * 清空好友列表
+		 */
+		clearFriendList() {
+			return new Promise((resolve, reject) => {
+				const dbVersion = getLocalDBVersion();
+				getDB(DATABASE_NAME, dbVersion).then(
+					(db) => {
+						truncateTable(db, TABLE_LIST.FriendInfo).then(
+							() => {
+								resolve();
+							}
+						);
+					}
+				);
+			});
+		},
     initSocket() {
-      this.$store.dispatch('socket/initEvent', { uid: 666, component: this });
+      this.$store.dispatch('socket/initEvent', { uid: this.uid, component: this });
     },
     /**
 		 * 登录提示
