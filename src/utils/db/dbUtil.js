@@ -108,63 +108,74 @@ export function existTable(tableName, db) {
 }
 
 /**
- * 向 [db]--[tableName]中新增一条记录[data]
- * @param {IDBDatabase} db
+ * 向 [tableName]中新增一条记录[data]
  * @param {string} tableName 存储的表名称
  * @param {object} data 记录
  */
-export function addRecord(db, tableName, data) {
+export function addRecord(tableName, data) {
   return new Promise(function(resolve, reject) {
-    const request = db.transaction(tableName, 'readwrite')
-      .objectStore(tableName)
-      .add(data);
-    request.onsuccess = function() {
-      db.close();
-      resolve({
-        code: 1000
-      });
-    };
-    request.onerror = function(e) {
-      db.close();
-      reject({
-        code: 0,
-        msg: e.target.error
-      });
-    };
+		const dbVersion = getLocalDBVersion();
+		getDB(DATABASE_NAME, dbVersion).then(
+			(db) => {
+				const request = db.transaction(tableName, 'readwrite')
+				.objectStore(tableName)
+				.add(data);
+				request.onsuccess = function() {
+					db.close();
+					resolve({
+						code: 1000
+					});
+				};
+				request.onerror = function(e) {
+					db.close();
+					reject({
+						code: 0,
+						msg: e.target.error
+					});
+				};
+			}
+		);
   });
 }
 
 /**
  * 清空指定的表中的数据
- * @param {IDBDatabase} db
  * @param {string} tableName 存储的表名称
  */
-export function truncateTable(db, tableName) {
+export function truncateTable(tableName) {
 	return new Promise((resolve, reject) => {
-		const request = db.transaction(tableName, 'readwrite')
-		.objectStore(tableName)
-		.clear();
-		request.onsuccess = function() {
-      db.close();
-      resolve({
-        code: 1000
-      });
-    };
+		const dbVersion = getLocalDBVersion();
+		getDB(DATABASE_NAME, dbVersion).then(
+			(db) => {
+				const request = db.transaction(tableName, 'readwrite')
+				.objectStore(tableName)
+				.clear();
+				request.onsuccess = function() {
+					db.close();
+					resolve({
+						code: 1000
+					});
+				};
+			}
+		);
 	});
 }
 
 /**
  * 批量新增数据
- * @param {string} dbName 数据库名称
- * @param {number} version 数据库版本
  * @param {string} tableName 存储的表名称
  * @param {array} data 要新增的数据
  */
-export function patchAddRecord(db, tableName, data) {
-	const objectStore = db.transaction(tableName, 'readwrite').objectStore(tableName);
-	data.forEach((item) => {
-		objectStore.add(item);
-	});
+export function patchAddRecord(tableName, data) {
+	const dbVersion = getLocalDBVersion();
+	getDB(DATABASE_NAME, dbVersion).then(
+		(db) => {
+			const objectStore = db.transaction(tableName, 'readwrite').objectStore(tableName);
+			data.forEach((item) => {
+				objectStore.add(item);
+			});
+		}
+	);
 }
 
 /**
@@ -222,41 +233,49 @@ export function getHisMsg(db, tableName, upper, count = 20) {
 /**
  * 删除 [db]-[tableName]下时间戳为[timeStamp]的某条聊天记录
  * 适用于聊天记录的删除
- * @param {IDBDatabase} db
  * @param {string} tableName
  * @param {number} timeStamp
  */
-export function deleteDBRecord(db, tableName, timeStamp) {
+export function deleteDBRecord(tableName, timeStamp) {
   return new Promise(function(resolve, reject) {
-    const request = db.transaction(tableName, 'readwrite')
-      .objectStore(tableName)
-      .delete(timeStamp);
-    request.onsuccess = function() {
-      db.close();
-      resolve({
-        code: 1000
-      });
-    };
+		const dbVersion = getLocalDBVersion();
+		getDB(DATABASE_NAME, dbVersion).then(
+			(db) => {
+				const request = db.transaction(tableName, 'readwrite')
+				.objectStore(tableName)
+				.delete(timeStamp);
+				request.onsuccess = function() {
+					db.close();
+					resolve({
+						code: 1000
+					});
+				};
+			}
+		);
   });
 }
 
 /**
- * 获取 [db]--[tableName]下，主键为 [key] 的某条记录
- * @param {IDBDatabase} db
+ * 获取 [tableName]下，主键为 [key] 的某条记录
  * @param {string} tableName
  * @param {string} key
  */
-export function getDataByKey(db, tableName, key) {
+export function getDataByKey(tableName, key) {
 	return new Promise((resolve, reject) => {
-		const request = db.transaction(tableName)
-		.objectStore(tableName)
-		.get(key);
-		request.onsuccess = function(e) {
-      db.close();
-      resolve({
-        code: 1000,
-				data: e.target.result
-      });
-    };
+		const dbVersion = getLocalDBVersion();
+		getDB(DATABASE_NAME, dbVersion).then(
+			(db) => {
+				const request = db.transaction(tableName)
+				.objectStore(tableName)
+				.get(key);
+				request.onsuccess = function(e) {
+					db.close();
+					resolve({
+						code: 1000,
+						data: e.target.result
+					});
+				};
+			}
+		);
 	});
 }

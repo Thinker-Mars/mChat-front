@@ -17,7 +17,7 @@ const routes = [
   {
     path: '/home',
     name: 'NewHome',
-    component: () => import('@/views/new-home'),
+    component: () => import('@/views/new-home/index'),
     meta: {
       keepAlive: false
     },
@@ -26,7 +26,7 @@ const routes = [
       {
         path: 'chat',
         name: 'Chat',
-        component: () => import('@/views/chat'),
+        component: () => import('@/views/chat/index'),
         meta: {
           keepAlive: true
         },
@@ -46,16 +46,16 @@ const routes = [
       {
         path: 'friend',
         name: 'Friend',
-        component: () => import('@/views/friend'),
+        component: () => import('@/views/friend/index'),
         meta: {
           keepAlive: true
         },
         children: [
           /** 好友信息 */
           {
-            path: ':Uid',
+            path: ':friendUid',
             name: 'FriendDetail',
-            component: () => import('@/components/friend-detail'),
+            component: () => import('@/components/friend-detail/index'),
             meta: {
               keepAlive: true
             }
@@ -66,7 +66,7 @@ const routes = [
       {
         path: 'idea',
         name: 'Idea',
-        component: () => import('@/views/idea'),
+        component: () => import('@/views/idea/index'),
         meta: {
           keepAlive: true
         }
@@ -75,7 +75,7 @@ const routes = [
       {
         path: 'setting',
         name: 'Setting',
-        component: () => import('@/views/setting'),
+        component: () => import('@/views/setting/index'),
         meta: {
           keepAlive: true
         }

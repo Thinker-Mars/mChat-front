@@ -1,6 +1,6 @@
 <template>
   <div class="new-home">
-    <keep-alive include="Chat,friend,Setting,Idea">
+    <keep-alive include="Chat,Friend,Setting,Idea">
       <router-view />
     </keep-alive>
     <bottom-menu />
@@ -11,7 +11,7 @@
 <script>
 import BottomMenu from './bottom-menu';
 import UserProfile from './user-profile';
-import { getDB, initDB, patchAddRecord, getLocalDBVersion, truncateTable } from '@/utils/db/dbUtil';
+import { initDB, patchAddRecord, truncateTable } from '@/utils/db/dbUtil';
 import { DATABASE_NAME, TABLE_LIST } from '@/utils/constants/db-constant';
 import friendList from './mock-friendlist';
 import { mapGetters } from 'vuex';
@@ -50,12 +50,7 @@ export default {
 		initFriendList(friendList) {
 			this.clearFriendList().then(
 				() => {
-					const dbVersion = getLocalDBVersion();
-					getDB(DATABASE_NAME, dbVersion).then(
-						(db) => {
-							patchAddRecord(db, TABLE_LIST.FriendInfo, JSON.parse(JSON.stringify(friendList)));
-						}
-					);
+					patchAddRecord(TABLE_LIST.FriendInfo, JSON.parse(JSON.stringify(friendList)));
 				}
 			);
 		},
@@ -64,14 +59,9 @@ export default {
 		 */
 		clearFriendList() {
 			return new Promise((resolve, reject) => {
-				const dbVersion = getLocalDBVersion();
-				getDB(DATABASE_NAME, dbVersion).then(
-					(db) => {
-						truncateTable(db, TABLE_LIST.FriendInfo).then(
-							() => {
-								resolve();
-							}
-						);
+				truncateTable(TABLE_LIST.FriendInfo).then(
+					() => {
+						resolve();
 					}
 				);
 			});

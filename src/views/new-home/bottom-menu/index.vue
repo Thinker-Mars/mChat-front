@@ -150,8 +150,8 @@ export default {
         if (this.allowJump('Friend')) {
           if (this.checkfriendUid !== undefined) {
             // 存在已选中的朋友窗口，显示对应的朋友信息窗口
-            if (this.allowJump2FriendWindow(this.currentUid)) {
-              this.$router.push(`/home/friend/${this.currentUid}`);
+            if (this.allowJump2FriendWindow(this.checkfriendUid)) {
+              this.$router.push(`/home/friend/${this.checkfriendUid}`);
             }
           } else {
             // 当前没有选中的聊天窗口，展示[朋友]页即可

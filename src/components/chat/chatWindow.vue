@@ -145,8 +145,11 @@ export default {
     ])
   },
   created() {
-    this.initData();
-    this.checkTableBeforeChat();
+		const { Uid } = this.$route.params;
+		if (Uid) {
+			this.initData();
+			this.checkTableBeforeChat();
+		}
   },
   methods: {
     /**
@@ -158,21 +161,18 @@ export default {
       this.chatTableName = `${this.friendUid}-chat`;
 			this.initFriendInfo();
     },
+
 		/**
 		 * 根据uid，获取好友信息
 		 */
 		initFriendInfo() {
-			const dbVersion = getLocalDBVersion();
-			getDB(DATABASE_NAME, dbVersion).then(
-        (db) => {
-					getDataByKey(db, TABLE_LIST.FriendInfo, this.friendUid).then(
-						(res) => {
-							this.friendInfo = res.data;
-						}
-					);
-        }
-      );
+			getDataByKey(TABLE_LIST.FriendInfo, this.friendUid).then(
+				(res) => {
+					this.friendInfo = res.data;
+				}
+			);
 		},
+
     /**
 		 * 发送消息
 		 */
@@ -208,12 +208,7 @@ export default {
         Content: msg,
         Timestamp: timestamp
       };
-      const dbVersion = getLocalDBVersion();
-      getDB(DATABASE_NAME, dbVersion).then(
-        (db) => {
-          addRecord(db, tableName, data);
-        }
-      );
+      addRecord(tableName, data);
     },
 
     /**
@@ -311,6 +306,7 @@ export default {
         }
       );
     },
+
     /**
 		 * 打开右键菜单
 		 */
@@ -319,6 +315,7 @@ export default {
       this.$refs.rightClick.open(pageX, pageY, 64);
       e.preventDefault();
     },
+
     /**
 		 * 记录hover时的消息
 		 * 辅助右键菜单的功能
@@ -329,6 +326,7 @@ export default {
         this.tempMsg = msg;
       }
     },
+
     /**
 		 * 处理右键菜单的事件
 		 * @param {string} commandKey 要执行的命令
@@ -343,6 +341,7 @@ export default {
         }
       }
     },
+
     /**
 		 * 删除指定的聊天记录
 		 * @param {object} msg 要删除的消息
@@ -350,7 +349,6 @@ export default {
     deleteMsg(msg) {
       const { Timestamp } = msg;
       const tableName = `${this.friendUid}-chat`;
-      const dbVersion = getLocalDBVersion();
       let needDelete = false;
       for (let i = 0; i < this.msgList.length; i++) {
         if (this.msgList[i].Type === msg.Type && this.msgList[i].Timestamp === msg.Timestamp) {
@@ -369,11 +367,7 @@ export default {
         }
       }
       if (needDelete) {
-        getDB(DATABASE_NAME, dbVersion).then(
-          (db) => {
-            deleteDBRecord(db, tableName, Timestamp);
-          }
-        );
+        deleteDBRecord(tableName, Timestamp);
       }
     }
 

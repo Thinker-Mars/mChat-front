@@ -54,8 +54,8 @@
 </template>
 
 <script>
-import { getDB, getDataByKey, getLocalDBVersion } from '@/utils/db/dbUtil';
-import { DATABASE_NAME, TABLE_LIST } from '@/utils/constants/db-constant';
+import { getDataByKey } from '@/utils/db/dbUtil';
+import { TABLE_LIST } from '@/utils/constants/db-constant';
 export default {
   name: 'FriendDetail',
   data() {
@@ -71,24 +71,21 @@ export default {
 	},
 	methods: {
 		init() {
-			const { Uid } = this.$route.params;
-      this.friendUid = Number(Uid);
-			this.getFriendInfo();
+			const { friendUid } = this.$route.params;
+			if (friendUid) {
+				this.friendUid = Number(friendUid);
+				this.getFriendInfo();
+			}
 		},
 		/**
 		 * 获取好友信息
 		 */
 		getFriendInfo() {
-			const dbVersion = getLocalDBVersion();
-			getDB(DATABASE_NAME, dbVersion).then(
-        (db) => {
-					getDataByKey(db, TABLE_LIST.FriendInfo, this.friendUid).then(
-						(res) => {
-							this.friendInfo = res.data;
-						}
-					);
-        }
-      );
+			getDataByKey(TABLE_LIST.FriendInfo, this.friendUid).then(
+				(res) => {
+					this.friendInfo = res.data;
+				}
+			);
 		}
 	}
 };

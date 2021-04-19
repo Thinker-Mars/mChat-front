@@ -27,7 +27,7 @@
       </div>
       <div class="right-window">
         <keep-alive include="FriendDetail">
-          <router-view :key="$route.params.Uid" />
+          <router-view :key="$route.params.friendUid" />
         </keep-alive>
       </div>
     </div>
