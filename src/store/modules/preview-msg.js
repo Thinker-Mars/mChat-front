@@ -61,7 +61,6 @@ const mutations = {
   UPDATE_MSG: (state, updateMsg) => {
     const { msgList } = state;
     const { Uid, Msg, Timestamp } = updateMsg;
-    // 已有窗口就更新消息
     for (let i = 0; i < msgList.length; i++) {
       if (msgList[i].Uid === Uid) {
         msgList.splice(i, 1);
@@ -197,7 +196,22 @@ const mutations = {
         }
       }
     }
-  }
+  },
+	/**
+	 * 从好友名片页发起聊天
+	 * 如果已存在预览窗口，就将其置顶，不存在就新建一个预览窗口
+	 */
+	CHECK_MSG_BY_UID: (state, uid) => {
+		const { msgList } = state;
+		const pos = msgList.findIndex((msg) => msg.Uid === uid);
+		if (pos !== -1) {
+			const existMsg = msgList.splice(pos, 1)[0];
+			msgList.unshift(existMsg);
+		} else {
+			// 没有已存在的窗口，新建一个窗口
+			msgList.unshift({ Uid: uid, Msg: '', Timestamp: (new Date()).getTime() });
+		}
+	}
 };
 
 const actions = {
@@ -256,7 +270,15 @@ const actions = {
     commit('UPDATE_MSG', { Uid: ProducerID, Msg, Timestamp });
     // 更新未读消息数
     commit('CNAHGE_MSG_COUNT', ProducerID, 1);
-  }
+  },
+	/**
+	 * 从好友名片页发起聊天
+	 */
+	chatFromFriendCard({ commit }, uid) {
+		commit('CHECK_MSG_BY_UID', uid);
+		commit('UPDATE_SELECTED', 0);
+		commit('UPDATE_CURRENTUID', uid);
+	}
 };
 
 export default {

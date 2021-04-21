@@ -47,7 +47,7 @@
         </div>
       </div>
     </div>
-    <div class="send-msg">
+    <div class="send-msg" @click="chat">
       发消息
     </div>
   </div>
@@ -86,6 +86,13 @@ export default {
 					this.friendInfo = res.data;
 				}
 			);
+		},
+		/**
+		 * 点击发消息，与好友聊天
+		 */
+		chat() {
+			this.$store.dispatch('previewMsg/chatFromFriendCard', this.friendUid);
+			this.$router.push({ path: `/home/chat/${this.friendUid}` });
 		}
 	}
 };
