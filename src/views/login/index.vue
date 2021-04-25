@@ -9,11 +9,11 @@
         @submit="handleSubmit"
       >
         <a-form-item label="手机号">
-          <a-input v-decorator="['identify', { rules: [{ required: true, message: '请输入账号'}] }]" />
+          <a-input v-decorator="['uid', { rules: [{ required: true, message: '请输入账号'}] }]" />
         </a-form-item>
         <a-form-item label="密码">
           <a-input
-            v-decorator="['pwd', { rules: [{ required: true, message: '请输入密码'}] }]"
+            v-decorator="['password', { rules: [{ required: true, message: '请输入密码'}] }]"
             type="password"
           />
         </a-form-item>
@@ -31,6 +31,8 @@
 </template>
 
 <script>
+import { login } from '@/api/user-center';
+import { RequestCode } from '@/utils/constants/request-constant';
 export default {
   name: 'Login',
   data() {
@@ -44,14 +46,20 @@ export default {
       const that = this;
       that.loginForm.validateFields((err, values) => {
         if (!err) {
-          // 建立socket连接，初始化监听
-          // that.$store.dispatch('socket/connect').then(() => {
-          //   that.$router.push({ path: '/home/chat' });
-          // });
-          const { identify } = values;
-          // 暂时以用户输入内容为uid
-          that.$store.dispatch('user/setUID', identify);
-					that.$router.push({ path: '/home/chat' });
+					const { uid, password } = values;
+					const param = { uid, password };
+					login(param).then((res) => {
+						if (res.code === RequestCode.Success) {
+							that.$store.dispatch('user/setUID', uid);
+							that.$router.push({ path: '/home/chat' });
+							// 建立socket连接，初始化监听
+							// that.$store.dispatch('socket/connect').then(() => {
+							// 	that.$router.push({ path: '/home/chat' });
+							// });
+						} else {
+							console.log(res.msg);
+						}
+					});
         }
       });
     }
