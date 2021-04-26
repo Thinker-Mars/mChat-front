@@ -4,12 +4,12 @@
       <div class="user-baseinfo">
         <span class="nickName">{{ friendInfo.NickName }}</span>
         <img
-          v-if="friendInfo.Gender === 1"
+          v-if="friendInfo.Gender === '1'"
           class="icon-gender top-4"
           src="@/assets/img/system/male.svg"
         >
         <img
-          v-if="friendInfo.Gender === 2"
+          v-if="friendInfo.Gender === '2'"
           class="icon-gender top-4"
           src="@/assets/img/system/female.svg"
         >

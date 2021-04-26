@@ -13,7 +13,7 @@ import BottomMenu from './bottom-menu';
 import UserProfile from './user-profile';
 import { initDB, patchAddRecord, truncateTable } from '@/utils/db/dbUtil';
 import { DATABASE_NAME, TABLE_LIST } from '@/utils/constants/db-constant';
-import friendList from './mock-friendlist';
+import { getFriendList } from '@/api/user-center';
 import { mapGetters } from 'vuex';
 export default {
   name: 'NewHome',
@@ -37,8 +37,9 @@ export default {
     },
 		initDatabase() {
 			initDB(DATABASE_NAME).then(
-				() => {
+				async() => {
 					// 调用接口，获取当前登录用户的好友信息，存入vuex，并写入indexeddb，数据暂时mock
+					const friendList = await this.fetchFriendList();
 					this.$store.dispatch('friend/setFriendList', JSON.parse(JSON.stringify(friendList)));
 					this.initFriendList(friendList);
 				}
@@ -65,6 +66,14 @@ export default {
 					}
 				);
 			});
+		},
+		/**
+		 * 获取好友列表
+		 */
+		async fetchFriendList() {
+			const param = { uid: this.uid };
+			const res = await getFriendList(param);
+			return res.data.friendList;
 		},
     initSocket() {
       this.$store.dispatch('socket/initEvent', { uid: this.uid, component: this });
