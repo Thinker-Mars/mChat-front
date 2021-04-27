@@ -31,12 +31,15 @@
 </template>
 
 <script>
-import { login } from '@/api/user-center';
+import { login, getFriendList } from '@/api/user-center';
+import { initDB, patchAddRecord, truncateTable } from '@/utils/db/dbUtil';
 import { RequestCode } from '@/utils/constants/request-constant';
+import { DATABASE_NAME, TABLE_LIST } from '@/utils/constants/db-constant';
 export default {
   name: 'Login',
   data() {
     return {
+			uid: undefined, // 正常登录时，记录uid，供获取好友列表使用
       loginForm: this.$form.createForm(this)
     };
   },
@@ -48,9 +51,13 @@ export default {
         if (!err) {
 					const { uid, password } = values;
 					const param = { uid, password };
-					login(param).then((res) => {
+					login(param).then(async(res) => {
+						this.uid = uid;
 						if (res.code === RequestCode.Success) {
-							that.$store.dispatch('user/setUID', uid);
+							that.uid = uid;
+							// 好友信息获取后，再跳转
+							await that.initDatabase();
+							that.$store.dispatch('user/setUserInfo', res.data.userinfo);
 							that.$router.push({ path: '/home/chat' });
 							// 建立socket连接，初始化监听
 							// that.$store.dispatch('socket/connect').then(() => {
@@ -62,7 +69,49 @@ export default {
 					});
         }
       });
-    }
+    },
+		initDatabase() {
+			return new Promise((resolve, reject) => {
+				initDB(DATABASE_NAME).then(
+					async() => {
+						const friendList = await this.fetchFriendList();
+						this.$store.dispatch('friend/setFriendList', JSON.parse(JSON.stringify(friendList)));
+						this.initFriendList(friendList);
+						resolve();
+					}
+				);
+			});
+		},
+		/**
+		 * 初始化好友列表
+		 */
+		initFriendList(friendList) {
+			this.clearFriendList().then(
+				() => {
+					patchAddRecord(TABLE_LIST.FriendInfo, JSON.parse(JSON.stringify(friendList)));
+				}
+			);
+		},
+		/**
+		 * 清空好友列表
+		 */
+		clearFriendList() {
+			return new Promise((resolve, reject) => {
+				truncateTable(TABLE_LIST.FriendInfo).then(
+					() => {
+						resolve();
+					}
+				);
+			});
+		},
+		/**
+		 * 获取好友列表
+		 */
+		async fetchFriendList() {
+			const param = { uid: this.uid };
+			const res = await getFriendList(param);
+			return res.data.friendList;
+		}
   }
 };
 </script>

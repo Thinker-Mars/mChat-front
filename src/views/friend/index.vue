@@ -286,6 +286,7 @@ export default {
 		float: right;
 		width: calc(100% - 236px);
 		height: 100%;
+		overflow-y: auto;
 	}
 }
 </style>

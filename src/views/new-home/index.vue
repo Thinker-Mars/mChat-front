@@ -11,9 +11,6 @@
 <script>
 import BottomMenu from './bottom-menu';
 import UserProfile from './user-profile';
-import { initDB, patchAddRecord, truncateTable } from '@/utils/db/dbUtil';
-import { DATABASE_NAME, TABLE_LIST } from '@/utils/constants/db-constant';
-import { getFriendList } from '@/api/user-center';
 import { mapGetters } from 'vuex';
 export default {
   name: 'NewHome',
@@ -23,58 +20,13 @@ export default {
   },
 	computed: {
     ...mapGetters([
-      'uid'
+      'userNickName'
     ])
   },
   created() {
-    this.init();
     this.loginNotice();
   },
   methods: {
-    init() {
-      this.initDatabase();
-      // this.initSocket();
-    },
-		initDatabase() {
-			initDB(DATABASE_NAME).then(
-				async() => {
-					// 调用接口，获取当前登录用户的好友信息，存入vuex，并写入indexeddb，数据暂时mock
-					const friendList = await this.fetchFriendList();
-					this.$store.dispatch('friend/setFriendList', JSON.parse(JSON.stringify(friendList)));
-					this.initFriendList(friendList);
-				}
-			);
-		},
-		/**
-		 * 初始化好友列表
-		 */
-		initFriendList(friendList) {
-			this.clearFriendList().then(
-				() => {
-					patchAddRecord(TABLE_LIST.FriendInfo, JSON.parse(JSON.stringify(friendList)));
-				}
-			);
-		},
-		/**
-		 * 清空好友列表
-		 */
-		clearFriendList() {
-			return new Promise((resolve, reject) => {
-				truncateTable(TABLE_LIST.FriendInfo).then(
-					() => {
-						resolve();
-					}
-				);
-			});
-		},
-		/**
-		 * 获取好友列表
-		 */
-		async fetchFriendList() {
-			const param = { uid: this.uid };
-			const res = await getFriendList(param);
-			return res.data.friendList;
-		},
     initSocket() {
       this.$store.dispatch('socket/initEvent', { uid: this.uid, component: this });
     },
@@ -101,21 +53,21 @@ export default {
 		 */
     getGreetByHour(hour) {
       if (hour < 6) {
-        return 'Hi，Cone，这么晚没睡，出了什么事呢';
+        return `Hi，${this.userNickName}，这么晚没睡，出了什么事呢`;
       }
       if (hour < 11) {
-        return 'Hi，Cone，早上好';
+        return `Hi，${this.userNickName}，早上好`;
       }
       if (hour < 14) {
-        return 'Hi，Cone，中午好，午饭吃过了吗';
+        return `Hi，${this.userNickName}，中午好，午饭吃过了吗`;
       }
       if (hour < 17) {
-        return 'Hi，Cone，下午好';
+        return `Hi，${this.userNickName}，下午好`;
       }
       if (hour < 22) {
-        return 'Hi，Cone，晚上好';
+        return `Hi，${this.userNickName}，晚上好`;
       }
-      return 'Hi，Cone，很晚了，快休息吧~';
+      return `Hi，${this.userNickName}，很晚了，快休息吧~`;
     }
   }
 };
