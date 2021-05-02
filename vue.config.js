@@ -13,7 +13,7 @@ module.exports = {
 		hot: true, // 启用 Hot Module Replacement 功能
 		proxy: {
 			[process.env.PROXY_API]: {
-				target: 'http://localhost:3000/',
+				target: 'http://47.92.82.34:9080/',
 				changeOrigin: true, // 默认情况下，代理时会保留主机头的来源，可以将 changeOrigin 设置为 true 以覆盖此行为
 				secure: false, // 代理http
 				ws: true,

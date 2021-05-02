@@ -6,9 +6,12 @@ import request from '../utils/request';
  */
 export function login(data) {
   return request({
-    url: '/usercenter/login',
+    url: '/userCenter/login',
     method: 'post',
-    data: data
+    data: data,
+		headers: {
+			apikey: 'usercenter'
+		}
   });
 }
 
@@ -18,8 +21,11 @@ export function login(data) {
  */
 export function getFriendList(data) {
 	return request({
-    url: '/usercenter/getFriendList',
+    url: '/userCenter/getFriendList',
     method: 'post',
-    data: data
+    data: data,
+		headers: {
+			apikey: 'usercenter'
+		}
   });
 }
