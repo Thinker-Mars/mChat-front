@@ -58,11 +58,10 @@ export default {
 							// 好友信息获取后，再跳转
 							await that.initDatabase();
 							that.$store.dispatch('user/setUserInfo', res.data.userinfo);
-							that.$router.push({ path: '/home/chat' });
 							// 建立socket连接，初始化监听
-							// that.$store.dispatch('socket/connect').then(() => {
-							// 	that.$router.push({ path: '/home/chat' });
-							// });
+							that.$store.dispatch('socket/connectSystem').then(() => {
+								that.$router.push({ path: '/home/chat' });
+							});
 						} else {
 							console.log(res.msg);
 						}

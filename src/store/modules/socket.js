@@ -23,23 +23,27 @@ const mutations = {
 };
 
 const actions = {
-  connect({ commit }) {
+  connectSystem({ commit }) {
     return new Promise((resolve, reject) => {
-      let _socket;
-      function _conn() {
-        return new Promise((resolve, reject) => {
-          resolve('http://127.0.0.1:3000/');
-        });
-      }
-      // 伪代码，后续换成查询服务地址
-      _conn().then(connection => {
-        _socket = new SocketIO({
-          connection,
-          debug: true
-        });
-        commit('SET_SOCKET', _socket);
-        resolve();
-      });
+			const socket = new SocketIO({
+				connection: 'http://47.92.82.34:9080',
+				options: {
+					path: '/onlineCenter/connect',
+					extraHeaders: {
+						apikey: 'onlinecenter'
+					},
+					transportOptions: {
+						polling: {
+							extraHeaders: {
+								apikey: 'onlinecenter'
+							}
+						}
+					}
+				},
+				debug: true
+			});
+			commit('SET_SOCKET', socket);
+			resolve();
     });
   },
   /**

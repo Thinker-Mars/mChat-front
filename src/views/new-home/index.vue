@@ -20,10 +20,12 @@ export default {
   },
 	computed: {
     ...mapGetters([
+			'uid',
       'userNickName'
     ])
   },
   created() {
+		this.initSocket();
     this.loginNotice();
   },
   methods: {
