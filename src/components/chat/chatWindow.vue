@@ -3,7 +3,7 @@
   <div class="chatWindow">
     <!-- 聊天对象名称 -->
     <div class="name-box">
-      <span class="name">{{ friendInfo.NoteName || friendInfo.NickName }}</span>
+      <span class="name">{{ friendInfo.NickName }}</span>
     </div>
     <div
       id="msg-info"
@@ -126,16 +126,16 @@ export default {
         }
       ], // 右键菜单命令配置
       msgList: [
-        {
-          Type: 1,
-          Content: '新年快乐！',
-          Timestamp: 1610201109000
-        },
-        {
-          Type: 2,
-          Content: '新年好！',
-          Timestamp: 1610288109000
-        }
+        // {
+        //   Type: 1,
+        //   Content: '新年快乐！',
+        //   Timestamp: 1610201109000
+        // },
+        // {
+        //   Type: 2,
+        //   Content: '新年好！',
+        //   Timestamp: 1610288109000
+        // }
       ]
     };
   },

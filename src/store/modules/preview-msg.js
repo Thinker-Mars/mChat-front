@@ -10,30 +10,24 @@ const state = {
 	 * }
 	 */
   msgList: [
-    {
-      Uid: 1101,
-      Msg: '来自草莓的消息',
-      UnReadMsgCount: 1,
-      Timestamp: 1610287509000
-    },
-    {
-      Uid: 1102,
-      Msg: '来自Lucky的消息',
-      UnReadMsgCount: 1,
-      Timestamp: 1609571539943
-    },
-    {
-      Uid: 1103,
-      Msg: '来自大壮的消息',
-      UnReadMsgCount: 0,
-      Timestamp: 1609571539944
-    },
-    {
-      Uid: 1104,
-      Msg: '来自小明的消息',
-      UnReadMsgCount: 0,
-      Timestamp: 1609571539945
-    }
+    // {
+    //   Uid: 10001,
+    //   Msg: '来自草莓的消息',
+    //   UnReadMsgCount: 1,
+    //   Timestamp: 1610287509000
+    // },
+    // {
+    //   Uid: 10006,
+    //   Msg: '来自Lucky的消息',
+    //   UnReadMsgCount: 1,
+    //   Timestamp: 1609571539943
+    // },
+    // {
+    //   Uid: 1104,
+    //   Msg: '来自小明的消息',
+    //   UnReadMsgCount: 0,
+    //   Timestamp: 1609571539945
+    // }
   ],
   /**
 	 * 当前选择的预览窗口
@@ -46,7 +40,7 @@ const state = {
   /**
 	 * 预览列表未读消息总数
 	 */
-  totalUnreadMsgCount: 2
+  totalUnreadMsgCount: 0
 };
 
 const mutations = {

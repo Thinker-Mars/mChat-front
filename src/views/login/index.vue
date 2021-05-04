@@ -32,6 +32,7 @@
 
 <script>
 import { login, getFriendList } from '@/api/user-center';
+import { getOfflineMsg } from '@/api/msg-center';
 import { initDB, patchAddRecord, truncateTable } from '@/utils/db/dbUtil';
 import { RequestCode } from '@/utils/constants/request-constant';
 import { DATABASE_NAME, TABLE_LIST } from '@/utils/constants/db-constant';
@@ -39,7 +40,7 @@ export default {
   name: 'Login',
   data() {
     return {
-			uid: undefined, // 正常登录时，记录uid，供获取好友列表使用
+			uid: undefined, // 登录时，记录uid，供获取 好友列表 与 离线消息使用
       loginForm: this.$form.createForm(this)
     };
   },
@@ -52,11 +53,12 @@ export default {
 					const { uid, password } = values;
 					const param = { uid, password };
 					login(param).then(async(res) => {
-						this.uid = uid;
 						if (res.code === RequestCode.Success) {
 							that.uid = uid;
 							// 好友信息获取后，再跳转
 							await that.initDatabase();
+							// 获取离线消息
+							that.fetchOfflineMsg();
 							that.$store.dispatch('user/setUserInfo', res.data.userinfo);
 							// 建立socket连接，初始化监听
 							that.$store.dispatch('socket/connectSystem').then(() => {
@@ -110,6 +112,16 @@ export default {
 			const param = { uid: this.uid };
 			const res = await getFriendList(param);
 			return res.data.friendList;
+		},
+		/**
+		 * 获取离线消息
+		 */
+		fetchOfflineMsg() {
+			const queue = `${this.uid}-queue`;
+			getOfflineMsg(queue).then(
+				(res) => {
+				}
+			);
 		}
   }
 };
