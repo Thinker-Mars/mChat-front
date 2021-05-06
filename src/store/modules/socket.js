@@ -1,40 +1,76 @@
-import SocketIO from "@/utils/socket/index";
+import SocketIO from '@/utils/socket/index';
 
 const state = {
-	socket: null // socket实例
-}
+  socket: null // socket实例
+};
 
 const mutations = {
-    SET_SOCKET: (state, socket) => {
-        state.socket = socket;
-    }
-}
+  /**
+	 * 保存socket对象
+	 */
+  SET_SOCKET: (state, socket) => {
+    state.socket = socket;
+  },
+  /**
+	 * 初始化socket的room
+	 */
+  INIT_ROOM: (state, uid) => {
+    const { io } = state.socket;
+    const socketId = io.id;
+    const data = { uid, socketId };
+    io.emit('initUserRoom', data);
+  }
+};
 
 const actions = {
-	connect({commit}) {
-		return new Promise((resolve, reject) => {
-			let _socket;
-			function _conn() {
-				return new Promise((resolve, reject) => {
-					resolve("http://localhost:3000/");
-				})
-			}
-			// 伪代码，后续换成查询服务地址
-			_conn().then(connection => {
-				_socket = new SocketIO({
-					connection,
-					debug: true
-				});
-				commit("SET_SOCKET", _socket);
-				resolve();
-			})
-		})
-	}
-}
+  connectSystem({ commit }) {
+    return new Promise((resolve, reject) => {
+			const socket = new SocketIO({
+				connection: 'http://47.92.82.34:9080',
+				options: {
+					path: '/onlineCenter/connect',
+					extraHeaders: {
+						apikey: 'onlinecenter'
+					},
+					transportOptions: {
+						polling: {
+							extraHeaders: {
+								apikey: 'onlinecenter'
+							}
+						}
+					}
+				},
+				debug: true
+			});
+			commit('SET_SOCKET', socket);
+			resolve();
+    });
+  },
+  /**
+	 * 初始化一些事件监听
+	 */
+  initEvent({ commit, dispatch, state }, initData) {
+    const { socket } = state;
+    const { uid, component } = initData;
+    socket.subscribe('connect', function() {
+      commit('INIT_ROOM', uid);
+    }, component);
+    socket.subscribe('receiveUserMsg', function(data) {
+      dispatch('previewMsg/receiveMsg', data);
+    }, component);
+  },
+  /**
+	 * 发送消息
+	 */
+  sendMsg({ state }, data) {
+    const { io } = state.socket;
+    io.emit('sendMsgToUser', data);
+  }
+};
 
 export default {
-	namespaced: true,
-	state,
-	mutations,
-	actions
-}
+  namespaced: true,
+  state,
+  mutations,
+  actions
+};

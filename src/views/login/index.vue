@@ -1,48 +1,132 @@
 <template>
-	<div class="login">
-		<img src="@/assets/login-bg/1.jpg">
-		<div class="login-form">
-			<a-form :form="loginForm" :label-col="{ span: 5 }" :wrapper-col="{ span: 16 }" @submit="handleSubmit">
-				<a-form-item label="手机号">
-					<a-input v-decorator="['identify', { rules: [{ required: true, message: '请输入账号'}] }]"/>
-				</a-form-item>
-				<a-form-item label="密码">
-					<a-input type="password" v-decorator="['pwd', { rules: [{ required: true, message: '请输入密码'}] }]"/>
-				</a-form-item>
-				<a-form-item class="login-btn">
-					<a-button type="primary" html-type="submit">登录</a-button>
-				</a-form-item>
-			</a-form>
-		</div>
-	</div>
-	
+  <div class="login">
+    <img src="@/assets/login-bg/1.jpg">
+    <div class="login-form">
+      <a-form
+        :form="loginForm"
+        :label-col="{ span: 5 }"
+        :wrapper-col="{ span: 16 }"
+        @submit="handleSubmit"
+      >
+        <a-form-item label="手机号">
+          <a-input v-decorator="['uid', { rules: [{ required: true, message: '请输入账号'}] }]" />
+        </a-form-item>
+        <a-form-item label="密码">
+          <a-input
+            v-decorator="['password', { rules: [{ required: true, message: '请输入密码'}] }]"
+            type="password"
+          />
+        </a-form-item>
+        <a-form-item class="login-btn">
+          <a-button
+            type="primary"
+            html-type="submit"
+          >
+            登录
+          </a-button>
+        </a-form-item>
+      </a-form>
+    </div>
+  </div>
 </template>
 
 <script>
+import { login, getFriendList } from '@/api/user-center';
+import { getOfflineMsg } from '@/api/msg-center';
+import { initDB, patchAddRecord, truncateTable, dropDatabase } from '@/utils/db/dbUtil';
+import { RequestCode } from '@/utils/constants/request-constant';
+import { DATABASE_NAME, TABLE_LIST } from '@/utils/constants/db-constant';
 export default {
-	name: "login",
-	data() {
-		return {
-			loginForm: this.$form.createForm(this)
-		}
-	},
-	methods: {
-		handleSubmit(e) {
-			e.preventDefault();
-			let that = this;
-			that.loginForm.validateFields((err, values) => {
-				if (!err) {
-					// 建立socket连接，初始化监听
-					that.$store.dispatch("socket/connect").then(() => {
-						that.$router.push({path: "/home"});
-					})
+  name: 'Login',
+  data() {
+    return {
+			uid: undefined, // 登录时，记录uid，供获取 好友列表 与 离线消息使用
+      loginForm: this.$form.createForm(this)
+    };
+  },
+  methods: {
+    handleSubmit(e) {
+      e.preventDefault();
+      const that = this;
+      that.loginForm.validateFields((err, values) => {
+        if (!err) {
+					const { uid, password } = values;
+					const param = { uid, password };
+					login(param).then(async(res) => {
+						if (res.code === RequestCode.Success) {
+							that.uid = uid;
+							// 清空DB
+							await dropDatabase(DATABASE_NAME);
+							// 好友信息获取后，再跳转
+							await that.initDatabase();
+							// 获取离线消息
+							that.fetchOfflineMsg();
+							that.$store.dispatch('user/setUserInfo', res.data.userinfo);
+							// 建立socket连接，初始化监听
+							that.$store.dispatch('socket/connectSystem').then(() => {
+								that.$router.push({ path: '/home/chat' });
+							});
+						} else {
+							console.log(res.msg);
+						}
+					});
+        }
+      });
+    },
+		initDatabase() {
+			return new Promise((resolve, reject) => {
+				initDB(DATABASE_NAME).then(
+					async() => {
+						const friendList = await this.fetchFriendList();
+						this.$store.dispatch('friend/setFriendList', JSON.parse(JSON.stringify(friendList)));
+						this.initFriendList(friendList);
+						resolve();
+					}
+				);
+			});
+		},
+		/**
+		 * 初始化好友列表
+		 */
+		initFriendList(friendList) {
+			this.clearFriendList().then(
+				() => {
+					patchAddRecord(TABLE_LIST.FriendInfo, JSON.parse(JSON.stringify(friendList)));
 				}
-			})
+			);
+		},
+		/**
+		 * 清空好友列表
+		 */
+		clearFriendList() {
+			return new Promise((resolve, reject) => {
+				truncateTable(TABLE_LIST.FriendInfo).then(
+					() => {
+						resolve();
+					}
+				);
+			});
+		},
+		/**
+		 * 获取好友列表
+		 */
+		async fetchFriendList() {
+			const param = { uid: this.uid };
+			const res = await getFriendList(param);
+			return res.data.friendList;
+		},
+		/**
+		 * 获取离线消息
+		 */
+		fetchOfflineMsg() {
+			const queue = `${this.uid}-queue`;
+			getOfflineMsg(queue).then(
+				(res) => {
+				}
+			);
 		}
-
-
-	}
-}
+  }
+};
 </script>
 
 <style lang="scss">
