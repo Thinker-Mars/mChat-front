@@ -266,6 +266,13 @@ const actions = {
     commit('CNAHGE_MSG_COUNT', ProducerID, 1);
   },
 	/**
+	 * 登录时，收到离线消息
+	 * @param {array} msgList
+	 */
+	receiveOfflineMsg({ commit }, msgList) {
+
+	},
+	/**
 	 * 从好友名片页发起聊天
 	 */
 	chatFromFriendCard({ commit }, uid) {

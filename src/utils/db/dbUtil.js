@@ -279,3 +279,16 @@ export function getDataByKey(tableName, key) {
 		);
 	});
 }
+
+/**
+ * 删除数据库
+ * @param {string} name 数据库名称
+ */
+export async function dropDatabase(name) {
+	return new Promise((resolve, reject) => {
+		const request = window.indexedDB.deleteDatabase(name);
+		request.onsuccess = function() {
+			resolve();
+		};
+	});
+}

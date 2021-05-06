@@ -33,7 +33,7 @@
 <script>
 import { login, getFriendList } from '@/api/user-center';
 import { getOfflineMsg } from '@/api/msg-center';
-import { initDB, patchAddRecord, truncateTable } from '@/utils/db/dbUtil';
+import { initDB, patchAddRecord, truncateTable, dropDatabase } from '@/utils/db/dbUtil';
 import { RequestCode } from '@/utils/constants/request-constant';
 import { DATABASE_NAME, TABLE_LIST } from '@/utils/constants/db-constant';
 export default {
@@ -55,6 +55,8 @@ export default {
 					login(param).then(async(res) => {
 						if (res.code === RequestCode.Success) {
 							that.uid = uid;
+							// 清空DB
+							await dropDatabase(DATABASE_NAME);
 							// 好友信息获取后，再跳转
 							await that.initDatabase();
 							// 获取离线消息

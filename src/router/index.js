@@ -16,8 +16,8 @@ const routes = [
   /** 主页 */
   {
     path: '/home',
-    name: 'NewHome',
-    component: () => import('@/views/new-home/index'),
+    name: 'Home',
+    component: () => import('@/views/home/index'),
     meta: {
       keepAlive: false
     },
