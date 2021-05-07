@@ -9,26 +9,7 @@ const state = {
 	 *   UnReadMsgCount: 未读消息数
 	 * }
 	 */
-  msgList: [
-    // {
-    //   Uid: 10001,
-    //   Msg: '来自草莓的消息',
-    //   UnReadMsgCount: 1,
-    //   Timestamp: 1610287509000
-    // },
-    // {
-    //   Uid: 10006,
-    //   Msg: '来自Lucky的消息',
-    //   UnReadMsgCount: 1,
-    //   Timestamp: 1609571539943
-    // },
-    // {
-    //   Uid: 1104,
-    //   Msg: '来自小明的消息',
-    //   UnReadMsgCount: 0,
-    //   Timestamp: 1609571539945
-    // }
-  ],
+  msgList: [],
   /**
 	 * 当前选择的预览窗口
 	 */
@@ -205,6 +186,17 @@ const mutations = {
 			// 没有已存在的窗口，新建一个窗口
 			msgList.unshift({ Uid: uid, Msg: '', Timestamp: (new Date()).getTime() });
 		}
+	},
+	/**
+	 * 保存离线消息
+	 * @param {array} msgList 离线消息
+	 */
+	SAVE_OFFLINE_MSG: (state, offlineMsgList) => {
+		const { msgList } = state;
+		offlineMsgList.forEach((msg) => {
+			msgList.push(msg);
+			state.totalUnreadMsgCount += msg.UnReadMsgCount;
+		});
 	}
 };
 
@@ -266,11 +258,11 @@ const actions = {
     commit('CNAHGE_MSG_COUNT', ProducerID, 1);
   },
 	/**
-	 * 登录时，收到离线消息
+	 * 保存收到的离线预览消息
 	 * @param {array} msgList
 	 */
 	receiveOfflineMsg({ commit }, msgList) {
-
+		commit('SAVE_OFFLINE_MSG', msgList);
 	},
 	/**
 	 * 从好友名片页发起聊天

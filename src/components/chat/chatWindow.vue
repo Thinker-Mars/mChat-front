@@ -289,19 +289,21 @@ export default {
       const tableName = `${uid}-chat`;
       const dbVersion = getLocalDBVersion();
       getDB(DATABASE_NAME, dbVersion).then(
-        (db) => {
+        async(db) => {
           // 表不存在，新建数据表
           if (!existTable(tableName, db)) {
             db.close();
-            const currentVersion = db.version;
-            createChatTable(currentVersion, uid);
+            createChatTable(`${uid}-chat`);
           } else {
             // 表已存在，获取当前表中数据量
-            countTableMsg(db, tableName).then(
-              (res) => {
-                this.msgCount = res.data;
-              }
-            );
+            // countTableMsg(db, tableName).then(
+            //   (res) => {
+            //     this.msgCount = res.data;
+            //   }
+            // );
+						// 获取当前表中数据量
+						const countRes = await countTableMsg(db, tableName);
+						this.msgCount = countRes.data;
           }
         }
       );

@@ -33,7 +33,7 @@
 <script>
 import { login, getFriendList } from '@/api/user-center';
 import { getOfflineMsg } from '@/api/msg-center';
-import { initDB, patchAddRecord, truncateTable, dropDatabase } from '@/utils/db/dbUtil';
+import { initDB, patchAddRecord, truncateTable, dropDatabase, createChatTable } from '@/utils/db/dbUtil';
 import { RequestCode } from '@/utils/constants/request-constant';
 import { DATABASE_NAME, TABLE_LIST } from '@/utils/constants/db-constant';
 export default {
@@ -91,7 +91,9 @@ export default {
 		initFriendList(friendList) {
 			this.clearFriendList().then(
 				() => {
-					patchAddRecord(TABLE_LIST.FriendInfo, JSON.parse(JSON.stringify(friendList)));
+					const msgMap = new Map();
+					msgMap.set(TABLE_LIST.FriendInfo, JSON.parse(JSON.stringify(friendList)));
+					patchAddRecord(msgMap);
 				}
 			);
 		},
@@ -122,8 +124,74 @@ export default {
 			const queue = `${this.uid}-queue`;
 			getOfflineMsg(queue).then(
 				(res) => {
+					if (res.length > 0) {
+						this.batchSaveOfflineMsg(res);
+						this.batchSavePreviewMsg(res);
+					}
 				}
 			);
+		},
+		/**
+		 * 将离线消息批量保存值DB
+		 * @param {array} msgList 离线消息
+		 */
+		async batchSaveOfflineMsg(msgList) {
+			const msgMap = new Map();
+			msgList.forEach((msgMeta) => {
+				const { ProducerID, Msg, Timestamp } = msgMeta;
+				const tableName = `${ProducerID}-chat`;
+				if (msgMap.has(tableName)) {
+					msgMap.get(tableName).push({ Type: 2, Content: Msg, Timestamp });
+				} else {
+					msgMap.set(tableName, [{ Type: 2, Content: Msg, Timestamp }]);
+				}
+			});
+			await this.batchCreateChatTable(msgMap);
+			patchAddRecord(msgMap);
+		},
+		/**
+		 * 批量创建聊天表
+		 * @param {Map}
+		 */
+		async batchCreateChatTable(msgMap) {
+			const msgIterator = msgMap.entries();
+			let currentMsgGroup = msgIterator.next().value;
+			while (currentMsgGroup) {
+				await createChatTable(currentMsgGroup[0]);
+				currentMsgGroup = msgIterator.next().value;
+			}
+		},
+		/**
+		 * 更新左侧预览数据
+		 * 抽取每组消息的最后一条数据，作为预览数据
+		 * @param {array} msgList 离线消息
+		 */
+		batchSavePreviewMsg(msgList) {
+			const msgMap = new Map();
+			msgList.forEach((msgMeta) => {
+				const { ProducerID, Msg, Timestamp } = msgMeta;
+				if (msgMap.has(ProducerID)) {
+					msgMap.get(ProducerID).push({ Msg, Timestamp });
+				} else {
+					msgMap.set(ProducerID, [{ Msg, Timestamp }]);
+				}
+			});
+			const previewList = [];
+			const msgIterator = msgMap.entries();
+			let currentMsgGroup = msgIterator.next().value;
+			while (currentMsgGroup) {
+				const Uid = currentMsgGroup[0];
+				const msgList = currentMsgGroup[1];
+				const { Msg, Timestamp } = msgList[msgList.length - 1];
+				previewList.push({
+					Uid,
+					Msg,
+					UnReadMsgCount: msgList.length,
+					Timestamp
+				});
+				currentMsgGroup = msgIterator.next().value;
+			}
+			this.$store.dispatch('previewMsg/receiveOfflineMsg', previewList);
 		}
   }
 };

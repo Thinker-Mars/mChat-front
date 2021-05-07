@@ -14,6 +14,9 @@ export function getDB(dbName, version) {
       const db = e.target.result;
       resolve(db);
     };
+		request.onerror = function(e) {
+			reject(e.target.error);
+		};
   });
 }
 
@@ -22,8 +25,8 @@ export function getDB(dbName, version) {
  * 如果用户第一次使用则返回1
  */
 export function getLocalDBVersion() {
-  const dbVersion = localStorage.getItem(DB_VERSION_IDENTIFY);
-  if (dbVersion) {
+  const dbVersion = Number(localStorage.getItem(DB_VERSION_IDENTIFY));
+  if (dbVersion > 0) {
     return dbVersion;
   }
   return 1;
@@ -73,29 +76,33 @@ export function initDB(dbName) {
 
 /**
  * 创建与朋友的聊天记录数据表
- * @param {number} version 当前数据库版本号
- * @param {number} uid 朋友的uid
+ * @param {string} tableName 表名
+ * tableName: ${uid}-chat
  */
-export function createChatTable(version, uid) {
-  const tableName = `${uid}-chat`;
-  const request = window.indexedDB.open(DATABASE_NAME, version + 1);
-  request.onupgradeneeded = function(e) {
-    updateLocalDBVersion(version + 1);
-    const db = e.target.result;
-    const table = Tables['Chat'];
-    const optionalParameters = {};
-    if (table.keyPath) {
-      optionalParameters['keyPath'] = table.keyPath;
-    }
-    if (table.autoIncrement) {
-      optionalParameters['autoIncrement'] = table.autoIncrement;
-    }
-    const objectStore = db.createObjectStore(tableName, optionalParameters);
-    for (const column in table.columns) {
-      objectStore.createIndex(column, column, { unique: table.columns[column].unique });
-    }
-    db.close();
-  };
+export function createChatTable(tableName) {
+	return new Promise((resolve, reject) => {
+		// 当前数据库版本号
+		const oldversion = getLocalDBVersion();
+		const request = window.indexedDB.open(DATABASE_NAME, oldversion + 1);
+		request.onupgradeneeded = function(e) {
+			updateLocalDBVersion(oldversion + 1);
+			const db = e.target.result;
+			const table = Tables['Chat'];
+			const optionalParameters = {};
+			if (table.keyPath) {
+				optionalParameters['keyPath'] = table.keyPath;
+			}
+			if (table.autoIncrement) {
+				optionalParameters['autoIncrement'] = table.autoIncrement;
+			}
+			const objectStore = db.createObjectStore(tableName, optionalParameters);
+			for (const column in table.columns) {
+				objectStore.createIndex(column, column, { unique: table.columns[column].unique });
+			}
+			db.close();
+			resolve();
+		};
+	});
 }
 
 /**
@@ -165,17 +172,53 @@ export function truncateTable(tableName) {
  * 批量新增数据
  * @param {string} tableName 存储的表名称
  * @param {array} data 要新增的数据
+ * @param {Map<string, array>} msgMap
+ * msgMap的entry格式如下：
+ * tableName: [
+ *  {data}, {data}...
+ * ]
  */
-export function patchAddRecord(tableName, data) {
+export function patchAddRecord(msgMap) {
 	const dbVersion = getLocalDBVersion();
 	getDB(DATABASE_NAME, dbVersion).then(
 		(db) => {
-			const objectStore = db.transaction(tableName, 'readwrite').objectStore(tableName);
-			data.forEach((item) => {
-				objectStore.add(item);
-			});
+			const msgIterator = msgMap.entries();
+			let currentMsgGroup = msgIterator.next().value;
+			while (currentMsgGroup) {
+				const tableName = currentMsgGroup[0];
+				const messages = currentMsgGroup[1];
+				if (messages.length > 0) {
+					messages.forEach(async(data) => {
+						await addRecordAsync(db, tableName, data);
+					});
+				}
+				currentMsgGroup = msgIterator.next().value;
+			}
+		},
+		(err) => {
+			console.log(err);
 		}
 	);
+}
+
+/**
+ * 内部插入数据方法
+ * @param {IDBDatabase} db
+ * @param {string} tableName
+ * @param {object} data
+ */
+function addRecordAsync(db, tableName, data) {
+	return new Promise((resolve, reject) => {
+		const request = db.transaction(tableName, 'readwrite')
+				.objectStore(tableName)
+				.add(data);
+		request.onsuccess = function() {
+			resolve();
+		};
+		request.onerror = function() {
+			reject();
+		};
+	});
 }
 
 /**
@@ -189,7 +232,7 @@ export function countTableMsg(db, tableName) {
       .objectStore(tableName)
       .count();
     request.onsuccess = function(e) {
-      db.close();
+      // db.close();
       resolve({
         code: 1000,
         data: e.target.result
