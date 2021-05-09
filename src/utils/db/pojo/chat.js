@@ -1,7 +1,7 @@
 const Chat = {
   columns: {
     Type: {
-      remark: '消息来源, 1:发送, 2:接收',
+      remark: '消息来源, 1:接收, 2:发送',
       unique: false
     },
     Content: {
@@ -13,7 +13,8 @@ const Chat = {
       unique: false
     }
   },
-  keyPath: 'Timestamp'
+	autoIncrement: true
+  // keyPath: 'Timestamp'
 };
 
 export default Chat;

@@ -92,16 +92,13 @@
 import { mapGetters } from 'vuex';
 import Emotion from '@/components/chat/emotion';
 import RightClick from '@/components/right-click';
-import { DATABASE_NAME, TABLE_LIST } from '@/utils/constants/db-constant';
+import { TABLE_LIST } from '@/utils/constants/db-constant';
 import {
-  getDB,
   existTable,
   createChatTable,
   addRecord,
-  countTableMsg,
-  deleteDBRecord,
-  getLocalDBVersion,
-	getDataByKey
+	getDataByKey,
+	getHisMsg
 } from '@/utils/db/dbUtil';
 export default {
   name: 'ChatWindow',
@@ -113,7 +110,6 @@ export default {
       friendUid: undefined, // 聊天对象的id
       chatTableName: undefined, // 聊天数据数据存储的表名称
 			friendInfo: {}, // 聊天对象的信息
-      msgCount: 0, // 数据总量(查询历史记录需要)
       tempMsg: {}, // hover的消息(辅助右键菜单)
       rightClickCommand: [
         {
@@ -125,18 +121,7 @@ export default {
           commandKey: 'deleteMsg'
         }
       ], // 右键菜单命令配置
-      msgList: [
-        // {
-        //   Type: 1,
-        //   Content: '新年快乐！',
-        //   Timestamp: 1610201109000
-        // },
-        // {
-        //   Type: 2,
-        //   Content: '新年好！',
-        //   Timestamp: 1610288109000
-        // }
-      ]
+      msgList: []
     };
   },
   computed: {
@@ -172,6 +157,24 @@ export default {
 				}
 			);
 		},
+
+		/**
+		 * 判断是否存在聊天的数据表
+		 * 没有则新建
+		 */
+    async checkTableBeforeChat() {
+      const tableName = `${this.friendUid}-chat`;
+			// 判断表是否存在
+			const haveTable = await existTable(tableName);
+			if (haveTable) {
+				// 首次打开时，获取所有数据
+				const msgRes = await getHisMsg(tableName, 'all');
+				this.msgList = JSON.parse(JSON.stringify(msgRes.data));
+			} else {
+				// 表不存在，创建聊天表
+				createChatTable(tableName);
+			}
+    },
 
     /**
 		 * 发送消息
@@ -281,35 +284,6 @@ export default {
     },
 
     /**
-		 * 判断是否存在聊天的数据表
-		 * 没有则新建
-		 */
-    checkTableBeforeChat() {
-      const uid = this.friendUid;
-      const tableName = `${uid}-chat`;
-      const dbVersion = getLocalDBVersion();
-      getDB(DATABASE_NAME, dbVersion).then(
-        async(db) => {
-          // 表不存在，新建数据表
-          if (!existTable(tableName, db)) {
-            db.close();
-            createChatTable(`${uid}-chat`);
-          } else {
-            // 表已存在，获取当前表中数据量
-            // countTableMsg(db, tableName).then(
-            //   (res) => {
-            //     this.msgCount = res.data;
-            //   }
-            // );
-						// 获取当前表中数据量
-						const countRes = await countTableMsg(db, tableName);
-						this.msgCount = countRes.data;
-          }
-        }
-      );
-    },
-
-    /**
 		 * 打开右键菜单
 		 */
     rightClick(e) {
@@ -349,12 +323,8 @@ export default {
 		 * @param {object} msg 要删除的消息
 		 */
     deleteMsg(msg) {
-      const { Timestamp } = msg;
-      const tableName = `${this.friendUid}-chat`;
-      let needDelete = false;
       for (let i = 0; i < this.msgList.length; i++) {
         if (this.msgList[i].Type === msg.Type && this.msgList[i].Timestamp === msg.Timestamp) {
-          needDelete = true;
           if (i === this.msgList.length - 1 && this.msgList.length > 1) {
             // 删除的是页面最后一条记录，删除后，需要更新左侧预览消息内容为上一条消息
             const newPreviewMsg = {
@@ -367,9 +337,6 @@ export default {
           this.msgList.splice(i, 1);
           break;
         }
-      }
-      if (needDelete) {
-        deleteDBRecord(tableName, Timestamp);
       }
     }
 

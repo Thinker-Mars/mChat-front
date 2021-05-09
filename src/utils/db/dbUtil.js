@@ -6,7 +6,7 @@ import Tables from '@/utils/db/pojo/index';
  * @param {string} dbName 数据库名称
  * @param {number} version 数据库版本
  */
-export function getDB(dbName, version) {
+function getDB(dbName, version) {
   return new Promise(function(resolve, reject) {
     const request = window.indexedDB.open(dbName, version);
     // 返回已有数据库
@@ -24,7 +24,7 @@ export function getDB(dbName, version) {
  * 获取db版本
  * 如果用户第一次使用则返回1
  */
-export function getLocalDBVersion() {
+function getLocalDBVersion() {
   const dbVersion = Number(localStorage.getItem(DB_VERSION_IDENTIFY));
   if (dbVersion > 0) {
     return dbVersion;
@@ -35,8 +35,15 @@ export function getLocalDBVersion() {
 /**
  * 更新localStorage中的数据库版本
  */
-export function updateLocalDBVersion(dbVersion) {
+function updateLocalDBVersion(dbVersion) {
   localStorage.setItem(DB_VERSION_IDENTIFY, dbVersion);
+}
+
+/**
+ * 删除 localStorage 中 dbversion 的值
+ */
+ function removeLocalDBVersion() {
+	localStorage.removeItem(DB_VERSION_IDENTIFY);
 }
 
 /**
@@ -108,10 +115,18 @@ export function createChatTable(tableName) {
 /**
  * 判断数据库中是否有某张表
  * @param {string} tableName 数据表名
- * @param {IDBDatabase} db 数据库
  */
-export function existTable(tableName, db) {
-  return db.objectStoreNames.contains(tableName);
+export function existTable(tableName) {
+	return new Promise((resolve, reject) => {
+		const dbVersion = getLocalDBVersion();
+		getDB(DATABASE_NAME, dbVersion).then(
+			(db) => {
+				const have = db.objectStoreNames.contains(tableName);
+				db.close();
+				resolve(have);
+			}
+		);
+	});
 }
 
 /**
@@ -223,53 +238,76 @@ function addRecordAsync(db, tableName, data) {
 
 /**
  * 获取某张表中的数据量
- * @param {IDBDatabase} db
  * @param {string} tableName
  */
-export function countTableMsg(db, tableName) {
+export function countTableMsg(tableName) {
   return new Promise(function(resolve, reject) {
-    const request = db.transaction(tableName, 'readonly')
-      .objectStore(tableName)
-      .count();
-    request.onsuccess = function(e) {
-      // db.close();
-      resolve({
-        code: 1000,
-        data: e.target.result
-      });
-    };
+		const dbVersion = getLocalDBVersion();
+		getDB(DATABASE_NAME, dbVersion).then(
+			(db) => {
+				const request = db.transaction(tableName, 'readonly')
+				.objectStore(tableName)
+				.count();
+				request.onsuccess = function(e) {
+					db.close();
+					resolve({
+						code: 1000,
+						data: e.target.result
+					});
+				};
+			}
+		);
   });
 }
 
 /**
  * 获取 [db]-[tableName]下索引在[upper]前的[count]条记录
- * @param {IDBDatabase} db
  * @param {string} tableName 数据表名称
+ * @param {string} mode all: 全部数据 range: 指定边界
  * @param {number} upper 右边界
- * @param {number} count 数量
+ * @param {number} count 数量(默认20条)
  */
-export function getHisMsg(db, tableName, upper, count = 20) {
+export function getHisMsg(tableName, mode, upper, count = 20) {
   return new Promise(function(resolve, reject) {
-    const lower = (upper - count) > 0 ? (upper - count) : 0;
-    // 开区间，不包含两头
-    const keyRange = IDBKeyRange.bound(lower, upper);
-    const records = [];
-    const request = db.transaction(tableName, 'readonly')
-      .objectStore(tableName)
-      .openCursor(keyRange);
-    request.onsuccess = function(e) {
-      const cursor = e.target.result;
-      if (cursor) {
-        records.push(cursor.value);
-        cursor.continue();
-      } else {
-        db.close();
-        resolve({
-          code: 1000,
-          data: records
-        });
-      }
-    };
+		const dbVersion = getLocalDBVersion();
+		getDB(DATABASE_NAME, dbVersion).then(
+			(db) => {
+				let request;
+				const records = [];
+				if (mode === 'all') {
+					request = db.transaction(tableName, 'readonly')
+					.objectStore(tableName)
+					.openCursor();
+				} else if (mode === 'range') {
+					const lower = (upper - count) > 0 ? (upper - count) : 0;
+					// 左开右闭区间，即不包含左端点
+					const keyRange = IDBKeyRange.bound(lower, upper, true, false);
+					request = db.transaction(tableName, 'readonly')
+					.objectStore(tableName)
+					.openCursor(keyRange);
+				} else {
+					db.close();
+					resolve({
+						code: 1000,
+						data: records
+					});
+					return;
+				}
+				request.onsuccess = function(e) {
+					const cursor = e.target.result;
+					if (cursor) {
+						records.push(cursor.value);
+						cursor.continue();
+					} else {
+						db.close();
+						resolve({
+							code: 1000,
+							data: records
+						});
+					}
+				};
+			}
+		);
   });
 }
 
@@ -330,6 +368,7 @@ export function getDataByKey(tableName, key) {
 export async function dropDatabase(name) {
 	return new Promise((resolve, reject) => {
 		const request = window.indexedDB.deleteDatabase(name);
+		removeLocalDBVersion();
 		request.onsuccess = function() {
 			resolve();
 		};

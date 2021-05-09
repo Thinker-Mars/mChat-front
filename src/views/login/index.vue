@@ -141,9 +141,9 @@ export default {
 				const { ProducerID, Msg, Timestamp } = msgMeta;
 				const tableName = `${ProducerID}-chat`;
 				if (msgMap.has(tableName)) {
-					msgMap.get(tableName).push({ Type: 2, Content: Msg, Timestamp });
+					msgMap.get(tableName).push({ Type: 1, Content: Msg, Timestamp });
 				} else {
-					msgMap.set(tableName, [{ Type: 2, Content: Msg, Timestamp }]);
+					msgMap.set(tableName, [{ Type: 1, Content: Msg, Timestamp }]);
 				}
 			});
 			await this.batchCreateChatTable(msgMap);
