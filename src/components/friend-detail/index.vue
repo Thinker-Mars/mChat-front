@@ -18,7 +18,7 @@
         </div>
       </div>
       <div class="user-avatar">
-        <img src="@/assets/img/user/preview.jpg">
+        <img :src="friendInfo.Avatar">
       </div>
     </div>
     <div class="info">
@@ -47,7 +47,10 @@
         </div>
       </div>
     </div>
-    <div class="send-msg" @click="chat">
+    <div
+      class="send-msg"
+      @click="chat"
+    >
       发消息
     </div>
   </div>

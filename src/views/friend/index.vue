@@ -17,7 +17,7 @@
             @click="checkFriendDetail(friendInfo.Uid)"
           >
             <div class="img-container">
-              <img src="@/assets/img/user/preview.jpg">
+              <img :src="friendInfo.Avatar">
             </div>
             <div class="note">
               {{ friendInfo.NoteName || friendInfo.NickName }}

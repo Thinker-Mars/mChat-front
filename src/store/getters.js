@@ -1,8 +1,6 @@
 const getters = {
-  /** 当前登录用户唯一id */
-  uid: (state) => state.user.userInfo.Uid,
-	/** 当前登录用户的昵称 */
-	userNickName: (state) => state.user.userInfo.NickName,
+	/** 当前登录用户的信息 */
+	loginUserInfo: (state) => state.user.userInfo,
   /** [朋友]页打开的朋友信息的uid */
   checkfriendUid: (state) => state.friend.checkfriendUid,
   /** 朋友列表 */

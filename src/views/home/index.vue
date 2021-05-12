@@ -20,17 +20,16 @@ export default {
   },
 	computed: {
     ...mapGetters([
-			'uid',
-      'userNickName'
+			'loginUserInfo'
     ])
   },
   created() {
-		this.initSocket();
+		// this.initSocket();
     this.loginNotice();
   },
   methods: {
     initSocket() {
-      this.$store.dispatch('socket/initEvent', { uid: this.uid, component: this });
+      this.$store.dispatch('socket/initEvent', { uid: this.loginUserInfo.uid, component: this });
     },
     /**
 		 * 登录提示
@@ -54,22 +53,23 @@ export default {
 		 * @param {number} hour 当前时间的hour
 		 */
     getGreetByHour(hour) {
+			const { NickName } = this.loginUserInfo;
       if (hour < 6) {
-        return `Hi，${this.userNickName}，这么晚没睡，出了什么事呢`;
+        return `Hi，${NickName}，这么晚没睡，出了什么事呢`;
       }
       if (hour < 11) {
-        return `Hi，${this.userNickName}，早上好`;
+        return `Hi，${NickName}，早上好`;
       }
       if (hour < 14) {
-        return `Hi，${this.userNickName}，中午好，午饭吃过了吗`;
+        return `Hi，${NickName}，中午好，午饭吃过了吗`;
       }
       if (hour < 17) {
-        return `Hi，${this.userNickName}，下午好`;
+        return `Hi，${NickName}，下午好`;
       }
       if (hour < 22) {
-        return `Hi，${this.userNickName}，晚上好`;
+        return `Hi，${NickName}，晚上好`;
       }
-      return `Hi，${this.userNickName}，很晚了，快休息吧~`;
+      return `Hi，${NickName}，很晚了，快休息吧~`;
     }
   }
 };

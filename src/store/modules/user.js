@@ -5,7 +5,7 @@ const state = {
 	 * Gender：性别
 	 * NickName：昵称
 	 * BirthDay：生日，如02.14
-	 * Avatar：头像在COS中的ID
+	 * Avatar：头像URL
 	 * Home：地址
 	 * Motto：格言
 	 */

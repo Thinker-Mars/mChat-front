@@ -126,7 +126,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'uid'
+			'loginUserInfo'
     ])
   },
   created() {
@@ -192,7 +192,7 @@ export default {
       // 更新左侧预览列表数据
       this.updatePreviewMsg(msg, timestamp);
       // 将消息发给朋友
-      this.sendToFriend(this.uid, this.friendUid, msg, timestamp);
+      this.sendToFriend(this.loginUserInfo.uid, this.friendUid, msg, timestamp);
       // 清空输入框
       this.clearMsg();
       // 页面滚动至最新的那条信息的位置
