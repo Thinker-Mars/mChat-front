@@ -81,7 +81,16 @@ const routes = [
         }
       }
     ]
-  }
+  },
+	/** 注册 */
+	{
+		path: '/register',
+    name: 'Register',
+    component: () => import('@/views/register/index'),
+    meta: {
+      keepAlive: false
+    }
+	}
 ];
 
 const router = new VueRouter({

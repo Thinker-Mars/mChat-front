@@ -8,7 +8,7 @@
         :wrapper-col="{ span: 16 }"
         @submit="handleSubmit"
       >
-        <a-form-item label="手机号">
+        <a-form-item label="账号">
           <a-input v-decorator="['uid', { rules: [{ required: true, message: '请输入账号'}] }]" />
         </a-form-item>
         <a-form-item label="密码">
@@ -26,6 +26,13 @@
           </a-button>
         </a-form-item>
       </a-form>
+			<a-button
+				type="primary"
+				html-type="submit"
+				@click="register"
+			>
+				注册
+			</a-button>
     </div>
   </div>
 </template>
@@ -193,12 +200,15 @@ export default {
 				currentMsgGroup = msgIterator.next().value;
 			}
 			this.$store.dispatch('previewMsg/receiveOfflineMsg', previewList);
+		},
+		register() {
+			this.$router.push({ path: '/register' });
 		}
   }
 };
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
 	.login {
 		width: 100%;
 		height: 100%;

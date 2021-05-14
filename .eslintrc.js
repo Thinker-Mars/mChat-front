@@ -269,6 +269,8 @@ module.exports = {
     // 不允许重复的attributes
     'vue/no-duplicate-attributes': 'error',
     // 不允许覆盖保留关键字
-    'vue/no-reserved-keys': 'error'
+    'vue/no-reserved-keys': 'error',
+		'vue/html-self-closing': 'off',
+		'vue/html-indent': 'off'
   }
 };
