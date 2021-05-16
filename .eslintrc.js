@@ -6,7 +6,8 @@ module.exports = {
   globals: {
     'module': true,
     'process': true,
-    'require': true
+    'require': true,
+    'Buffer': true
   },
   rules: {
     // 禁用

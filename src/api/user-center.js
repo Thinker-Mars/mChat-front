@@ -16,6 +16,21 @@ export function login(data) {
 }
 
 /**
+ * 用户注册
+ * @param {Object} data
+ */
+export function register(data) {
+  return request({
+    url: '/userCenter/register',
+    method: 'post',
+    data: data,
+		headers: {
+			apikey: 'usercenter'
+		}
+  });
+}
+
+/**
  * 获取好友列表
  * @param {Object} data
  */
@@ -45,6 +60,19 @@ export function getTmpCredential(data) {
     url: `/userCenter/getTmpCredential?${query}`,
     method: 'get',
     data: data,
+		headers: {
+			apikey: 'usercenter'
+		}
+  });
+}
+
+/**
+ * 获取非对称加密的公钥
+ */
+export function getPublicKey() {
+  return request({
+    url: '/userCenter/getPublicKey',
+    method: 'get',
 		headers: {
 			apikey: 'usercenter'
 		}

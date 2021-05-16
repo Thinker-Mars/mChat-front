@@ -10,12 +10,18 @@
 			>
 				<a-form-model-item label="昵称" prop="NickName">
 					<a-input v-model="registerForm.NickName" />
+					<a-tooltip title="请控制昵称长度不超过 10 位">
+						<a-icon type="question-circle" style="margin-left: 10px" />
+					</a-tooltip>
 				</a-form-model-item>
 				<a-form-model-item label="密码" prop="Password">
-					<a-input v-model="registerForm.Password" />
+					<a-input-password v-model="registerForm.Password" :visibilityToggle="false" />
+					<a-tooltip title="请控制密码长度在 10 到 14 位之间">
+						<a-icon type="question-circle" style="margin-left: 10px" />
+					</a-tooltip>
 				</a-form-model-item>
 				<a-form-model-item label="确认密码" prop="ConfirmPassword">
-					<a-input v-model="registerForm.ConfirmPassword" />
+					<a-input-password v-model="registerForm.ConfirmPassword" :visibilityToggle="false" />
 				</a-form-model-item>
 				<a-form-model-item label="上传头像">
 					<a-upload
@@ -24,8 +30,12 @@
 						:beforeUpload="beforeUpload"
 						:accept="acceptImageType.join(',')"
 						:customRequest="handleUpload"
+						:remove="handleRemove"
 					>
 						<a-button> <a-icon type="upload" /> 点击上传 </a-button>
+						<a-tooltip title="如不上传，则使用如下默认头像">
+							<a-icon type="question-circle" style="margin-left: 10px" />
+						</a-tooltip>
 					</a-upload>
 				</a-form-model-item>
 				<a-form-model-item class="register-button">
@@ -56,11 +66,23 @@
 </template>
 
 <script>
-import { getTmpCredential } from '@/api/user-center';
+import { register, getTmpCredential, getPublicKey } from '@/api/user-center';
+import { putTempObject } from '@/utils/cos-helper';
+import { genRandomNum, encrypt } from '@/utils/commonFun';
 export default {
 	name: 'Register',
 	data() {
+		const confirmPasswordValidate = (rule, value, callback) => {
+			if (value !== this.registerForm.Password) {
+				return callback(new Error('密码不一致，请确认'));
+			} else {
+				callback();
+			}
+		};
 		return {
+			/**
+			 * 注册表单初始数据
+			 */
 			registerForm: {
 				NickName: undefined,
 				Password: undefined,
@@ -77,41 +99,53 @@ export default {
 			/**
 			 * 已上传的图片列表
 			 */
-			fileList: [],
+			fileList: [
+				{
+					uid: genRandomNum(6),
+					name: '默认头像',
+					status: 'done',
+					url: 'https://mchat-tmp-1259375888.cos.ap-nanjing.myqcloud.com/register-image/default.jpg'
+				}
+			],
 			/**
 			 * 临时图片在COS中的folder名
 			 */
 			folder: 'register-image',
+			/**
+			 * 注册表单校验规则
+			 */
 			rules: {
 				NickName: [
-					{ required: true, message: '请输入昵称', trigger: 'blur' }
+					{ required: true, message: '请输入昵称', trigger: 'blur' },
+					{ min: 1, max: 10, message: '昵称长度不应超过10位', trigger: 'blur' }
 				],
 				Password: [
-					{ required: true, message: '请输入密码', trigger: 'blur' }
+					{ required: true, message: '请输入密码', trigger: 'blur' },
+					{ min: 10, max: 14, message: '密码长度为10-14位', trigger: 'blur' }
 				],
 				ConfirmPassword: [
-					{ required: true, message: '请再次输入密码', trigger: 'blur' }
+					{ required: true, message: '请再次输入密码', trigger: 'blur' },
+					{ required: true, validator: confirmPasswordValidate, trigger: 'blur' }
 				]
-			}
+			},
+			/**
+			 * 上传图片的key
+			 */
+			uploadKey: undefined
 		};
 	},
+	created() {
+		this.init();
+	},
 	methods: {
-		beforeUpload(file, fileList) {
-			const data = { folder: this.folder };
-			getTmpCredential(data).then(
-				(res) => {
-					const { code } = res;
-					if (code === 1) {
-						// 成功获取临时密钥，执行上传
-					}
-				}
-			);
+		init() {
+			this.uploadKey = `${(new Date()).getTime()}-${genRandomNum(6)}`;
+		},
+		beforeUpload(file) {
 			const checkResult = this.check(file);
 			if (!checkResult) {
 				return false;
 			}
-			console.log(file);
-			console.log(fileList);
 			return true;
 		},
 		/**
@@ -153,14 +187,69 @@ export default {
 		/**
 		 * 自定义图片上传
 		 */
-		handleUpload() {
-
+		handleUpload(uploadData) {
+			const { file } = uploadData;
+			const data = { folder: this.folder };
+			getTmpCredential(data).then(
+				(res) => {
+					const { code, data } = res;
+					if (code === 1) {
+						// 文件名
+						const filename = file.name;
+						// 文件后缀
+						const suffix = filename.substring(filename.lastIndexOf('.') + 1);
+						// 在COS中的位置
+						const key = `${this.folder}/${this.uploadKey}.${suffix}`;
+						putTempObject(data, key, file).then(
+							(putRes) => {
+								this.fileList = [];
+								this.fileList.push({
+									uid: genRandomNum(6),
+									name: filename,
+									status: 'done',
+									url: `https://${putRes.Location}`
+								});
+								this.successTip('操作成功', '图片上传成功');
+							},
+							() => {
+								this.errorTip('操作失败', '上传失败，请稍候重试');
+							}
+						);
+					}
+				}
+			);
+		},
+		/**
+		 * 移除图片
+		 */
+		handleRemove() {
+			this.fileList = [];
+			return true;
 		},
 		/**
 		 * 注册
 		 */
 		register() {
-
+			this.$refs.registerForm.validate((valid) => {
+				if (valid) {
+					getPublicKey().then(
+						(res) => {
+							const { data } = res;
+							const { NickName, Password } = this.registerForm;
+							const registerData = {
+								NickName,
+								Password: encrypt(Password, data),
+								Avatar: this.uploadKey,
+								PublicKey: data
+							};
+							register(registerData);
+						},
+						() => {
+							this.errorTip('操作失败', '系统繁忙，请稍候再试');
+						}
+					);
+				}
+			});
 		},
 		/**
 		 * 前往登录
@@ -177,7 +266,19 @@ export default {
 			this.$Notification.open({
 				message,
 				description,
-				icon: <a-icon type="exclamation-circle" style="color: #DC143C" />
+				icon: <a-icon type="close" style="color: #DC143C" />
+			});
+		},
+		/**
+		 * 成功提示
+		 * @param {string} message 提示title
+		 * @param {string} description 提示内容
+		 */
+		successTip(message, description) {
+			this.$Notification.open({
+				message,
+				description,
+				icon: <a-icon type="check" style="color: #2E8B57"/>
 			});
 		}
 	}
@@ -193,6 +294,9 @@ export default {
 .register-form {
 	width: 50%;
   margin: 0 auto;
+	input {
+		width: calc(100% - 24px);
+	}
 	.ant-form-item-label {
 		width: 20%;
 	}

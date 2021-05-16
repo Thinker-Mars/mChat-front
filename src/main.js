@@ -2,7 +2,7 @@ import Vue from 'vue';
 import App from './App.vue';
 import router from './router';
 import store from './store';
-import { Button, Form, Input, Menu, Icon, Upload, Notification, Modal, FormModel } from 'ant-design-vue';
+import { Button, Form, Input, Menu, Icon, Upload, Notification, Modal, FormModel, Tooltip } from 'ant-design-vue';
 import { tellTime } from '@/utils/commonFun';
 
 Vue.use(Form);
@@ -13,6 +13,7 @@ Vue.use(Menu);
 Vue.use(Icon);
 Vue.use(Upload);
 Vue.use(Modal);
+Vue.use(Tooltip);
 
 Vue.config.productionTip = false;
 

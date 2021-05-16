@@ -1,3 +1,5 @@
+const { publicEncrypt } = require('crypto');
+
 /**
  * 生成指定位数的数字
  * @param {number} length
@@ -39,4 +41,14 @@ export function tellTime(timestamp, mode = 1) {
     }
     return `${year}年 ${month}月${day}日 ${hour}:${showMinutes}`;
   }
+}
+
+/**
+ * 非对称加密
+ * @param {string} content 要加密的内容
+ * @param {string} publicKey 公钥
+ * @returns 加密后的内容
+ */
+export function encrypt(content, publicKey) {
+  return publicEncrypt(publicKey, Buffer.from(content)).toString('base64');
 }
