@@ -16,7 +16,7 @@
 				</a-form-model-item>
 				<a-form-model-item label="密码" prop="Password">
 					<a-input-password v-model="registerForm.Password" :visibilityToggle="false" />
-					<a-tooltip title="请控制密码长度在 10 到 14 位之间">
+					<a-tooltip title="请控制密码长度在 8 到 14 位之间">
 						<a-icon type="question-circle" style="margin-left: 10px" />
 					</a-tooltip>
 				</a-form-model-item>
@@ -69,6 +69,7 @@
 import { register, getTmpCredential, getPublicKey } from '@/api/user-center';
 import { putTempObject } from '@/utils/cos-helper';
 import { genRandomNum, encrypt } from '@/utils/commonFun';
+import { RequestCode } from '@/utils/constants/request-constant';
 export default {
 	name: 'Register',
 	data() {
@@ -121,7 +122,7 @@ export default {
 				],
 				Password: [
 					{ required: true, message: '请输入密码', trigger: 'blur' },
-					{ min: 10, max: 14, message: '密码长度为10-14位', trigger: 'blur' }
+					{ min: 8, max: 14, message: '密码长度为8-14位', trigger: 'blur' }
 				],
 				ConfirmPassword: [
 					{ required: true, message: '请再次输入密码', trigger: 'blur' },
@@ -134,7 +135,7 @@ export default {
 			uploadKey: undefined
 		};
 	},
-	created() {
+	mounted() {
 		this.init();
 	},
 	methods: {
@@ -193,7 +194,7 @@ export default {
 			getTmpCredential(data).then(
 				(res) => {
 					const { code, data } = res;
-					if (code === 1) {
+					if (code === RequestCode.Success) {
 						// 文件名
 						const filename = file.name;
 						// 文件后缀
@@ -234,15 +235,34 @@ export default {
 				if (valid) {
 					getPublicKey().then(
 						(res) => {
-							const { data } = res;
+							const PublicKey = res.data;
 							const { NickName, Password } = this.registerForm;
 							const registerData = {
 								NickName,
-								Password: encrypt(Password, data),
+								Password: encrypt(Password, PublicKey),
 								Avatar: this.uploadKey,
-								PublicKey: data
+								PublicKey: PublicKey
 							};
-							register(registerData);
+							register(registerData).then(
+								(regRes) => {
+									const that = this;
+									const { code, data } = regRes;
+									if (code === RequestCode.Success) {
+										const { Uid } = data;
+										that.$Success({
+											title: '注册成功',
+											content: `账号注册成功，你的专属UID是：${Uid}，快去登录吧~`,
+											okText: '前往登录',
+											keyboard: false,
+											onOk() {
+												that.$router.push({ path: '/' });
+											}
+										});
+									} else {
+										that.errorTip('注册失败', '系统繁忙，请稍候再试');
+									}
+								}
+							);
 						},
 						() => {
 							this.errorTip('操作失败', '系统繁忙，请稍候再试');

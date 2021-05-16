@@ -2,30 +2,29 @@
   <div class="login">
     <img src="@/assets/login-bg/1.jpg">
     <div class="login-form">
-      <a-form
-        :form="loginForm"
+      <a-form-model
+				ref="loginForm"
+        :model="loginForm"
+				:rules="rules"
         :label-col="{ span: 5 }"
         :wrapper-col="{ span: 16 }"
-        @submit="handleSubmit"
       >
-        <a-form-item label="账号">
-          <a-input v-decorator="['uid', { rules: [{ required: true, message: '请输入账号'}] }]" />
-        </a-form-item>
-        <a-form-item label="密码">
-          <a-input
-            v-decorator="['password', { rules: [{ required: true, message: '请输入密码'}] }]"
-            type="password"
-          />
-        </a-form-item>
-        <a-form-item class="login-btn">
+        <a-form-model-item label="UID" prop="Uid">
+          <a-input v-model="loginForm.Uid" />
+        </a-form-model-item>
+        <a-form-model-item label="密码" prop="Password">
+					<a-input-password v-model="loginForm.Password" :visibilityToggle="false" />
+        </a-form-model-item>
+        <a-form-model-item class="login-btn">
           <a-button
             type="primary"
             html-type="submit"
+						@click="handleSubmit"
           >
             登录
           </a-button>
-        </a-form-item>
-      </a-form>
+        </a-form-model-item>
+      </a-form-model>
 			<a-button
 				type="primary"
 				html-type="submit"
@@ -38,48 +37,71 @@
 </template>
 
 <script>
-import { login, getFriendList } from '@/api/user-center';
+import { login, getFriendList, getPublicKey } from '@/api/user-center';
 import { getOfflineMsg } from '@/api/msg-center';
 import { initDB, patchAddRecord, truncateTable, dropDatabase, createChatTable } from '@/utils/db/dbUtil';
 import { RequestCode } from '@/utils/constants/request-constant';
 import { DATABASE_NAME, TABLE_LIST } from '@/utils/constants/db-constant';
+import { encrypt } from '@/utils/commonFun';
 export default {
   name: 'Login',
   data() {
     return {
 			uid: undefined, // 登录时，记录uid，供获取 好友列表 与 离线消息使用
-      loginForm: this.$form.createForm(this)
+      loginForm: {
+				Uid: undefined,
+				Password: undefined
+			},
+			rules: {
+				Uid: [
+					{ required: true, message: '请输入UID', trigger: 'blur' }
+				],
+				Password: [
+					{ required: true, message: '请输入密码', trigger: 'blur' }
+				]
+			}
     };
   },
   methods: {
-    handleSubmit(e) {
-      e.preventDefault();
-      const that = this;
-      that.loginForm.validateFields((err, values) => {
-        if (!err) {
-					const { uid, password } = values;
-					const param = { uid, password };
-					login(param).then(async(res) => {
-						if (res.code === RequestCode.Success) {
-							that.uid = uid;
-							// 清空DB
-							await dropDatabase(DATABASE_NAME);
-							// 好友信息获取后，再跳转
-							await that.initDatabase();
-							// 获取离线消息
-							// that.fetchOfflineMsg();
-							that.$store.dispatch('user/setUserInfo', res.data.userinfo);
-							that.$router.push({ path: '/home/chat' });
-							// 建立socket连接，初始化监听
-							// that.$store.dispatch('socket/connectSystem').then(() => {
-							// 	that.$router.push({ path: '/home/chat' });
-							// });
-						} else {
-							console.log(res.msg);
+    handleSubmit() {
+			const that = this;
+			this.$refs.loginForm.validate((valid) => {
+				if (valid) {
+					const { Uid, Password } = that.loginForm;
+					getPublicKey().then(
+						(res) => {
+							const PublicKey = res.data;
+							const loginData = {
+								Uid,
+								Password: encrypt(Password, PublicKey),
+								PublicKey
+							};
+							login(loginData).then(async(res) => {
+								if (res.code === RequestCode.Success) {
+									that.uid = Uid;
+									// 清空DB
+									await dropDatabase(DATABASE_NAME);
+									// 好友信息获取后，再跳转
+									await that.initDatabase();
+									// 获取离线消息
+									// that.fetchOfflineMsg();
+									that.$store.dispatch('user/setUserInfo', res.data.userinfo);
+									that.$router.push({ path: '/home/chat' });
+									// 建立socket连接，初始化监听
+									// that.$store.dispatch('socket/connectSystem').then(() => {
+									// 	that.$router.push({ path: '/home/chat' });
+									// });
+								} else {
+									console.log(res.msg);
+								}
+							});
+						},
+						() => {
+
 						}
-					});
-        }
-      });
+					);
+				}
+			});
     },
 		initDatabase() {
 			return new Promise((resolve, reject) => {
