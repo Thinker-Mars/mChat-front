@@ -14,6 +14,12 @@
 						<a-icon type="question-circle" style="margin-left: 10px" />
 					</a-tooltip>
 				</a-form-model-item>
+				<a-form-model-item label="性别" prop="Gender">
+					<a-radio-group v-model="registerForm.Gender" name="radioGroup">
+						<a-radio :value="'1'">男</a-radio>
+						<a-radio :value="'2'">女</a-radio>
+					</a-radio-group>
+				</a-form-model-item>
 				<a-form-model-item label="密码" prop="Password">
 					<a-input-password v-model="registerForm.Password" :visibilityToggle="false" />
 					<a-tooltip title="请控制密码长度在 8 到 14 位之间">
@@ -87,7 +93,8 @@ export default {
 			registerForm: {
 				NickName: undefined,
 				Password: undefined,
-				ConfirmPassword: undefined
+				ConfirmPassword: undefined,
+				Gender: undefined
 			},
 			/**
 			 * 接受的图片类型
@@ -127,12 +134,19 @@ export default {
 				ConfirmPassword: [
 					{ required: true, message: '请再次输入密码', trigger: 'blur' },
 					{ required: true, validator: confirmPasswordValidate, trigger: 'blur' }
+				],
+				Gender: [
+					{ required: true, message: '请选择性别', trigger: 'change' },
 				]
 			},
 			/**
-			 * 上传图片的key
+			 * 上传图片时系统生成的key
 			 */
-			uploadKey: undefined
+			uploadKey: undefined,
+			/**
+			 * 实际上传时使用的key，如果没有上传则此值为 ''
+			 */
+			activeUploadKey: ''
 		};
 	},
 	mounted() {
@@ -210,6 +224,8 @@ export default {
 									status: 'done',
 									url: `https://${putRes.Location}`
 								});
+								// 记录上传的key
+								this.activeUploadKey = key;
 								this.successTip('操作成功', '图片上传成功');
 							},
 							() => {
@@ -224,7 +240,10 @@ export default {
 		 * 移除图片
 		 */
 		handleRemove() {
+			// 清空上传列表
 			this.fileList = [];
+			// 清空真实的上传的图片key
+			this.activeUploadKey = '';
 			return true;
 		},
 		/**
@@ -236,11 +255,12 @@ export default {
 					getPublicKey().then(
 						(res) => {
 							const PublicKey = res.data;
-							const { NickName, Password } = this.registerForm;
+							const { NickName, Password, Gender } = this.registerForm;
 							const registerData = {
 								NickName,
 								Password: encrypt(Password, PublicKey),
-								Avatar: this.uploadKey,
+								Avatar: this.activeUploadKey,
+								Gender,
 								PublicKey: PublicKey
 							};
 							register(registerData).then(
