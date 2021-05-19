@@ -2,6 +2,22 @@
   <div class="friend">
     <div class="container">
       <div class="left-preview">
+				<div class="similar-group">
+					<div class="group-desc">
+						新的朋友
+					</div>
+					<div
+						:class="lookNewFriend ? 'card active' : 'card'"
+						@click="checkNewFriend"
+					>
+						<div class="img-container">
+              <img src="@/assets/img/system/add-friend.svg">
+            </div>
+            <div class="note">
+              新的朋友
+            </div>
+					</div>
+				</div>
         <div
           v-for="(groupedFriend, index) in groupedFriendList"
           :key="index"
@@ -26,7 +42,7 @@
         </div>
       </div>
       <div class="right-window">
-        <keep-alive include="FriendDetail">
+        <keep-alive include="FriendDetail,NewFriend">
           <router-view :key="$route.params.friendUid" />
         </keep-alive>
       </div>
@@ -60,7 +76,9 @@ export default {
 			 * 	}
 			 * ]
 			 */
-			groupedFriendList: {}
+			groupedFriendList: {},
+			/** 是否查看「新的朋友」 */
+			lookNewFriend: false
     };
   },
   computed: {
@@ -190,10 +208,22 @@ export default {
 		 * 查看朋友详情
 		 */
 		checkFriendDetail(friendUid) {
+			this.lookNewFriend = false;
 			// 记录当前查看的朋友详情的uid
 			this.$store.dispatch('friend/setFriendUID', friendUid);
 			if (this.allowJump(friendUid)) {
 				this.$router.push(`/home/friend/${friendUid}`);
+			}
+		},
+		/**
+		 * 查看「新的朋友」
+		 */
+		checkNewFriend() {
+			this.lookNewFriend = true;
+			const { path } = this.$route;
+			const newFriendPath = '/home/friend/newFriend';
+			if (path !== newFriendPath) {
+				this.$router.push(newFriendPath);
 			}
 		},
 		/**

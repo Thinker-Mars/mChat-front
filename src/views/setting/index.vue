@@ -1,19 +1,14 @@
 <template>
   <div class="setting">
     <div class="container">
-      设置
+      敬请期待！
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'Setting',
-  data() {
-    return {
-
-    };
-  }
+  name: 'Setting'
 };
 </script>
 

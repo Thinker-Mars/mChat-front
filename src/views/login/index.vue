@@ -67,39 +67,39 @@ export default {
 			const that = this;
 			this.$refs.loginForm.validate((valid) => {
 				if (valid) {
-					const { Uid, Password } = that.loginForm;
-					getPublicKey().then(
-						(res) => {
-							const PublicKey = res.data;
-							const loginData = {
-								Uid,
-								Password: encrypt(Password, PublicKey),
-								PublicKey
-							};
-							login(loginData).then(async(res) => {
-								if (res.code === RequestCode.Success) {
-									that.uid = Uid;
-									// 清空DB
-									await dropDatabase(DATABASE_NAME);
-									// 好友信息获取后，再跳转
-									await that.initDatabase();
-									// 获取离线消息
-									// that.fetchOfflineMsg();
-									that.$store.dispatch('user/setUserInfo', res.data.userinfo);
-									that.$router.push({ path: '/home/chat' });
-									// 建立socket连接，初始化监听
-									// that.$store.dispatch('socket/connectSystem').then(() => {
-									// 	that.$router.push({ path: '/home/chat' });
-									// });
-								} else {
-									console.log(res.msg);
-								}
-							});
-						},
-						() => {
+					that.$router.push({ path: '/home/chat' });
+					// const { Uid, Password } = that.loginForm;
+					// getPublicKey().then(
+					// 	(res) => {
+					// 		const PublicKey = res.data;
+					// 		const loginData = {
+					// 			Uid,
+					// 			Password: encrypt(Password, PublicKey),
+					// 			PublicKey
+					// 		};
+					// 		login(loginData).then(async(res) => {
+					// 			if (res.code === RequestCode.Success) {
+					// 				that.uid = Uid;
+					// 				// 清空DB
+					// 				await dropDatabase(DATABASE_NAME);
+					// 				// 好友信息获取后，再跳转
+					// 				await that.initDatabase();
+					// 				// 获取离线消息
+					// 				that.fetchOfflineMsg();
+					// 				that.$store.dispatch('user/setUserInfo', res.data.userinfo);
+					// 				// 建立socket连接，初始化监听
+					// 				that.$store.dispatch('socket/connectSystem').then(() => {
+					// 					that.$router.push({ path: '/home/chat' });
+					// 				});
+					// 			} else {
+					// 				console.log(res.msg);
+					// 			}
+					// 		});
+					// 	},
+					// 	() => {
 
-						}
-					);
+					// 	}
+					// );
 				}
 			});
     },

@@ -1,19 +1,14 @@
 <template>
   <div class="idea">
     <div class="container">
-      想法
+      敬请期待！
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'Idea',
-  data() {
-    return {
-
-    };
-  }
+  name: 'Idea'
 };
 </script>
 

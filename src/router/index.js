@@ -51,6 +51,15 @@ const routes = [
           keepAlive: true
         },
         children: [
+					/** 新的朋友 */
+					{
+						path: 'newFriend',
+						name: 'NewFriend',
+						component: () => import('@/views/newFriend/index'),
+						meta: {
+							keepAlive: true
+						}
+					},
           /** 好友信息 */
           {
             path: ':friendUid',
