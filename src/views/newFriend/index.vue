@@ -1,34 +1,49 @@
 <template>
 	<div class="new-friend">
-		<div class="page-title">
-			新的朋友
-		</div>
-		<div class="choose-view">
-			<span :class="chooseType === 'list' ? 'active' : ''" @click="checkApplyList">好友申请</span>
-			<span :class="chooseType === 'add' ? 'active' : ''" @click="checkAddFriend">添加好友</span>
+		<div class="sticky">
+			<div class="page-title">
+				新的朋友
+			</div>
+			<div class="choose-view">
+				<span :class="chooseType === 'list' ? 'active' : ''" @click="checkApplyList">好友申请</span>
+				<span :class="chooseType === 'add' ? 'active' : ''" @click="checkAddFriend">添加好友</span>
+			</div>
 		</div>
 		<!-- 好友申请 -->
 		<div v-if="chooseType === 'list'" class="apply-list">
-			<div class="card">
+			<div v-if="Object.keys(applyList).length === 0" class="no-apply">
+				<img src="@/assets/img/system/no-match-friend.svg">
+			</div>
+			<div v-for="(applyUser, index) in applyList" v-else :key="index" class="card">
 				<div class="img-container">
 					<img src="@/assets/img/user/preview.jpg">
 				</div>
 				<div class="info">
 					<div class="name">
-						Cone
+						{{ applyUser.NickName }}
 					</div>
 					<div class="greet">
-						你好
+						{{ applyUser.Greet }}
 					</div>
-					<div class="status">
-						已添加
+					<div class="operate">
+						<a-button type="primary" @click="apply(applyUser.Uid)">
+							同意
+						</a-button>
 					</div>
 				</div>
 			</div>
 		</div>
 		<!-- 添加好友 -->
-		<div v-if="chooseType === 'add'">
-			添加好友
+		<div v-show="chooseType === 'add'" class="add-friend" spellcheck="false">
+			<div class="type-to-search">
+				<a-input-search placeholder="输入对方昵称 或 UID 进行搜索" style="width: 80%" @search="handleSearch" />
+			</div>
+			<div v-show="searching" class="loading">
+				<a-spin />
+			</div>
+			<div v-show="!searching && matchList.length === 0" class="no-match-friend">
+				<img src="@/assets/img/system/no-match-friend.svg">
+			</div>
 		</div>
 	</div>
 </template>
@@ -42,7 +57,26 @@ export default {
 			 * 当前查看的tab类型
 			 * list：好友申请  add：添加好友
 			 */
-			chooseType: 'list'
+			chooseType: 'list',
+			/**
+			 * true表示正在搜索中
+			 */
+			searching: false,
+			/**
+			 * 好友申请列表
+			 */
+			applyList: [
+				// {
+				// 	Uid: 11111,
+				// 	NickName: 'Cone',
+				// 	Avatar: '',
+				// 	Greet: '你好'
+				// }
+			],
+			/**
+			 * 搜索匹配的用户列表
+			 */
+			matchList: []
 		};
 	},
 	methods: {
@@ -57,6 +91,19 @@ export default {
 		 */
 		checkAddFriend() {
 			this.chooseType = 'add';
+		},
+		/**
+		 * 同意好友申请
+		 * @param uid 申请人的id
+		 */
+		apply(uid) {
+			console.log(uid, 'uid');
+		},
+		handleSearch(value) {
+			this.searching = true;
+			setTimeout(() => {
+				this.searching = false;
+			}, 2000);
 		}
 	}
 };
@@ -64,9 +111,16 @@ export default {
 
 <style scoped lang="scss">
 .new-friend {
+	width: 100%;
+	height: 100%;
 	user-select: none;
 }
+.sticky {
+	position: sticky;
+	top: 0;
+}
 .page-title {
+	height: 40px;
 	padding-bottom: 14px;
 	padding-left: 20px;
 	font-size: 18px;
@@ -91,12 +145,27 @@ export default {
 .choose-view span.active {
 	background-color: #c7c6c5 !important;
 }
+.no-apply {
+	height: 100%;
+	text-align: center;
+	img {
+		position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+	}
+}
 .apply-list {
-	width: 70%;
+  height: calc(100% - 73px);
 	margin: 0 auto;
+	overflow-y: auto;
 	.card {
+		width: 70%;
+    margin: 0 auto;
 		padding: 20px 0;
 		border-bottom: 1px solid #dfdede;
+	}
+	.card:last-child {
+		border-bottom: none;
 	}
 	.img-container {
 		display: inline-block;
@@ -116,20 +185,59 @@ export default {
 		height: 54px;
 		.name {
 			position: absolute;
+			display: inline-block;
+			max-width: 80%;
 			top: 2px;
+			white-space: nowrap;
+			text-overflow: ellipsis;
+			overflow: hidden;
 			color: #000000;
 		}
-		.status {
+		.operate {
 			position: relative;
 			float: right;
-			top: 14px;
-			cursor: pointer;
+			top: 12px;
 		}
 		.greet {
 			position: absolute;
+			display: inline-block;
+			max-width: 80%;
 			bottom: 2px;
+			white-space: nowrap;
+			text-overflow: ellipsis;
+			overflow: hidden;
 			color: #a8b0b9;
 		}
+	}
+}
+.apply-list::-webkit-scrollbar {
+	width: 8px;
+	height: 10px;
+}
+.apply-list::-webkit-scrollbar-thumb {
+	border-radius: 10px;
+	background: #D8D8D8;
+}
+.add-friend {
+	height: calc(100% - 73px);
+}
+.type-to-search {
+	padding-top: 20px;
+	padding-bottom: 10px;
+	text-align: center;
+}
+.loading {
+	height: 100px;
+	line-height: 100px;
+	text-align: center;
+}
+.no-match-friend {
+	height: calc(100% - 62px);
+	text-align: center;
+	img {
+		position: relative;
+    top: 50%;
+    transform: translateY(-50%);
 	}
 }
 </style>

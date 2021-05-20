@@ -2,7 +2,7 @@ import Vue from 'vue';
 import App from './App.vue';
 import router from './router';
 import store from './store';
-import { Button, Input, Menu, Icon, Upload, Notification, Modal, FormModel, Tooltip, Radio } from 'ant-design-vue';
+import { Button, Input, Menu, Icon, Upload, Notification, Modal, FormModel, Tooltip, Radio, Spin } from 'ant-design-vue';
 import { tellTime } from '@/utils/commonFun';
 
 Vue.use(FormModel);
@@ -14,6 +14,7 @@ Vue.use(Upload);
 Vue.use(Modal);
 Vue.use(Tooltip);
 Vue.use(Radio);
+Vue.use(Spin);
 
 Vue.config.productionTip = false;
 
