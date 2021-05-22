@@ -24,12 +24,12 @@ export default {
     ])
   },
   created() {
-		// this.initSocket();
+		this.initSocket();
     this.loginNotice();
   },
   methods: {
     initSocket() {
-      this.$store.dispatch('socket/initEvent', { uid: this.loginUserInfo.uid, component: this });
+      this.$store.dispatch('socket/initEvent', { uid: this.loginUserInfo.Uid, component: this });
     },
     /**
 		 * 登录提示

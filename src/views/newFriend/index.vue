@@ -38,17 +38,54 @@
 			<div class="type-to-search">
 				<a-input-search placeholder="输入对方昵称 或 UID 进行搜索" style="width: 80%" @search="handleSearch" />
 			</div>
+			<!-- 加载中效果 -->
 			<div v-show="searching" class="loading">
 				<a-spin />
 			</div>
 			<div v-show="!searching && matchList.length === 0" class="no-match-friend">
 				<img src="@/assets/img/system/no-match-friend.svg">
 			</div>
+			<div
+				v-for="(matchUser, index) in matchList"
+				v-show="!searching && matchList.length !== 0"
+				:key="index"
+				class="card"
+			>
+				<div class="img-container">
+					<img :src="matchUser.Avatar">
+				</div>
+				<div class="info">
+					<div class="name">
+						{{ matchUser.NickName }}
+					</div>
+					<div class="motto">
+						{{ matchUser.Motto }}
+					</div>
+					<div v-if="matchUser.IsFriend === 2" class="operate">
+						<a-button type="primary" @click="add(matchUser.Uid)" :disabled="matchUser.hasSendApply">
+							添加
+						</a-button>
+					</div>
+				</div>
+			</div>
 		</div>
+		<a-modal
+      v-model="showApply"
+      title="申请添加好友"
+      centered
+			:maskClosable="false"
+			okText="发送"
+      @ok="handleOK"
+    >
+			<a-input v-model="greet" placeholder="打个招呼吧~" />
+    </a-modal>
 	</div>
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
+import { getUser } from '@/api/user-center';
+import { RequestCode } from '@/utils/constants/request-constant';
 export default {
 	name: 'NewFriend',
 	data() {
@@ -62,23 +99,53 @@ export default {
 			 * true表示正在搜索中
 			 */
 			searching: false,
+			// /**
+			//  * 好友申请列表
+			//  */
+			// applyList: [
+			// 	// {
+			// 	// 	Uid: 11111,
+			// 	// 	NickName: 'Cone',
+			// 	// 	Avatar: '',
+			// 	// 	Greet: '你好'
+			// 	// }
+			// ],
 			/**
-			 * 好友申请列表
+			 * 搜索匹配的用户列表
 			 */
-			applyList: [
+			matchList: [
 				// {
 				// 	Uid: 11111,
 				// 	NickName: 'Cone',
 				// 	Avatar: '',
-				// 	Greet: '你好'
+				// 	Motto: '用户备注',
+				// 	IsFriend: 2
 				// }
 			],
 			/**
-			 * 搜索匹配的用户列表
+			 * 记录前一次的查询关键字
 			 */
-			matchList: []
+			oldKeyword: undefined,
+			/**
+			 * 是否展示 [好友申请]对话框
+			 */
+			showApply: false,
+			/**
+			 * 申请添加好友时，打招呼的内容
+			 */
+			greet: '',
+			/**
+			 * 记录当前欲添加的好友ID
+			 */
+			currentApplyUID: undefined
 		};
 	},
+	computed: {
+    ...mapGetters([
+      'loginUserInfo',
+			'applyList'
+    ])
+  },
 	methods: {
 		/**
 		 * 点击「好友申请」
@@ -99,11 +166,93 @@ export default {
 		apply(uid) {
 			console.log(uid, 'uid');
 		},
-		handleSearch(value) {
+		/**
+		 * 添加好友
+		 * @param uid 用户id
+		 */
+		add(Uid) {
+			this.currentApplyUID = Uid;
+			this.openApplyModal();
+		},
+		/**
+		 * 将 [发送申请标志] 更改为 [已发送]
+		 * @param {number} Uid 对方UID
+		 */
+		changeSendFlag(Uid) {
+			const pos = this.matchList.findIndex((user) => user.Uid === Uid);
+			if (pos !== -1) {
+				this.matchList[pos].hasSendApply = true;
+			}
+		},
+		openApplyModal() {
+			this.showApply = true;
+		},
+		closeApplyModal() {
+			this.showApply = false;
+		},
+		/**
+		 * 处理 [好友申请]对话框 的 确认
+		 */
+		handleOK() {
+			// this.changeSendFlag(this.currentApplyUID);
+			this.$store.dispatch(
+				'socket/sendFriendApply',
+				{
+					ProducerID: this.loginUserInfo.Uid,
+					ConsumerID: this.currentApplyUID,
+					NickName: this.loginUserInfo.NickName,
+					Avatar: this.loginUserInfo.Avatar,
+					Greet: this.greet
+				}
+			);
+			this.closeApplyModal();
+			this.successTip('操作成功', '好友申请已发送给ta啦');
+			this.greet = '';
+			this.currentApplyUID = undefined;
+		},
+		/**
+		 * 根据关键字搜索用户
+		 * @param {string} value 关键字
+		 */
+		handleSearch(Keyword) {
+			// 没有输入关键字 | 正在查询中 | 查询参数没变 情况下，不进行搜索
+			if (!Keyword || this.searching || this.oldKeyword === Keyword) {
+				return;
+			}
+			const { Uid } = this.loginUserInfo;
+			const param = { Uid, Keyword };
 			this.searching = true;
-			setTimeout(() => {
-				this.searching = false;
-			}, 2000);
+			this.oldKeyword = Keyword;
+			getUser(param).then(
+				(res) => {
+					if (res.code === RequestCode.Success) {
+						const { matchUser } = res.data;
+						this.matchList = matchUser.map((user) => {
+							user.hasSendApply = false;
+							return user;
+						});
+					}
+				},
+				(err) => {
+					console.log(err);
+				}
+			).finally(
+				() => {
+					this.searching = false;
+				}
+			);
+		},
+		/**
+		 * 成功提示
+		 * @param {string} message 提示title
+		 * @param {string} description 提示内容
+		 */
+		successTip(message, description) {
+			this.$Notification.open({
+				message,
+				description,
+				icon: <a-icon type="check" style="color: #2E8B57"/>
+			});
 		}
 	}
 };
@@ -158,57 +307,6 @@ export default {
   height: calc(100% - 73px);
 	margin: 0 auto;
 	overflow-y: auto;
-	.card {
-		width: 70%;
-    margin: 0 auto;
-		padding: 20px 0;
-		border-bottom: 1px solid #dfdede;
-	}
-	.card:last-child {
-		border-bottom: none;
-	}
-	.img-container {
-		display: inline-block;
-		width: 54px;
-		height: 54px;
-		margin-right: 10px;
-		img {
-			width: 100%;
-			height: 100%;
-		}
-	}
-	.info {
-		position: relative;
-		display: inline-block;
-		vertical-align: middle;
-		width: calc(100% - 64px);
-		height: 54px;
-		.name {
-			position: absolute;
-			display: inline-block;
-			max-width: 80%;
-			top: 2px;
-			white-space: nowrap;
-			text-overflow: ellipsis;
-			overflow: hidden;
-			color: #000000;
-		}
-		.operate {
-			position: relative;
-			float: right;
-			top: 12px;
-		}
-		.greet {
-			position: absolute;
-			display: inline-block;
-			max-width: 80%;
-			bottom: 2px;
-			white-space: nowrap;
-			text-overflow: ellipsis;
-			overflow: hidden;
-			color: #a8b0b9;
-		}
-	}
 }
 .apply-list::-webkit-scrollbar {
 	width: 8px;
@@ -218,8 +316,68 @@ export default {
 	border-radius: 10px;
 	background: #D8D8D8;
 }
+.card {
+	width: 70%;
+	margin: 0 auto;
+	padding: 20px 0;
+	border-bottom: 1px solid #dfdede;
+}
+.card:last-child {
+	border-bottom: none;
+}
+.img-container {
+	display: inline-block;
+	width: 54px;
+	height: 54px;
+	margin-right: 10px;
+	img {
+		width: 100%;
+		height: 100%;
+	}
+}
+.info {
+	position: relative;
+	display: inline-block;
+	vertical-align: middle;
+	width: calc(100% - 64px);
+	height: 54px;
+	.name {
+		position: absolute;
+		display: inline-block;
+		max-width: 80%;
+		top: 2px;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		color: #000000;
+	}
+	.operate {
+		position: relative;
+		float: right;
+		top: 12px;
+	}
+	.greet, .motto {
+		position: absolute;
+		display: inline-block;
+		max-width: 80%;
+		bottom: 2px;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		color: #a8b0b9;
+	}
+}
 .add-friend {
 	height: calc(100% - 73px);
+	overflow-y: auto;
+}
+.add-friend::-webkit-scrollbar {
+	width: 8px;
+	height: 10px;
+}
+.add-friend::-webkit-scrollbar-thumb {
+	border-radius: 10px;
+	background: #D8D8D8;
 }
 .type-to-search {
 	padding-top: 20px;

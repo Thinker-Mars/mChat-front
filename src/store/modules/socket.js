@@ -26,7 +26,8 @@ const actions = {
   connectSystem({ commit }) {
     return new Promise((resolve, reject) => {
 			const socket = new SocketIO({
-				connection: 'http://47.92.82.34:9080',
+				// connection: 'http://47.92.82.34:9080',
+        connection: 'http://127.0.0.1:4000',
 				options: {
 					path: '/onlineCenter/connect',
 					extraHeaders: {
@@ -55,16 +56,30 @@ const actions = {
     socket.subscribe('connect', function() {
       commit('INIT_ROOM', uid);
     }, component);
+    /** 收到聊天数据 */
     socket.subscribe('receiveUserMsg', function(data) {
       dispatch('previewMsg/receiveMsg', data);
     }, component);
+    /** 收到好友申请的数据 */
+    socket.subscribe('receiveFriendApplyMsg', function(data) {
+      console.log(data, 'datatttt');
+      dispatch('friend/receiveApply', data);
+    }, component);
   },
   /**
-	 * 发送消息
+	 * 发送聊天消息
 	 */
   sendMsg({ state }, data) {
     const { io } = state.socket;
     io.emit('sendMsgToUser', data);
+  },
+  /**
+   * 发送好友申请
+   * @param {object} data
+   */
+  sendFriendApply({ state }, data) {
+    const { io } = state.socket;
+    io.emit('sendFriendApply', data);
   }
 };
 

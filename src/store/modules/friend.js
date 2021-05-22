@@ -1,6 +1,7 @@
 const state = {
   checkfriendUid: undefined, // [朋友]页查看的朋友的uid
-  friendList: [] // 朋友列表数据
+  friendList: [], // 朋友列表数据
+	applyList: [] // 好友申请列表
 };
 
 const mutations = {
@@ -31,6 +32,13 @@ const actions = {
 	 */
 	setFriendList({ commit }, friendList) {
 		commit('SET_FRIEND_LIST', friendList);
+	},
+	/**
+	 * 收到好友申请
+	 * @param {object} data 好友申请数据
+	 */
+	receiveApply({ commit }, data) {
+		console.log(data, '收到申请');
 	}
 };
 

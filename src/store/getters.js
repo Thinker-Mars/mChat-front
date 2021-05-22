@@ -5,6 +5,8 @@ const getters = {
   checkfriendUid: (state) => state.friend.checkfriendUid,
   /** 朋友列表 */
   friendList: (state) => state.friend.friendList,
+  /** 好友申请列表 */
+  applyList: (state) => state.friend.applyList,
   /** socket连接实例 */
   socket: (state) => state.socket.socket,
   /** 消息预览列表 */

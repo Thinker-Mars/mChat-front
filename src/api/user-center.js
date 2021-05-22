@@ -1,6 +1,23 @@
 import request from '../utils/request';
 
 /**
+ * 将参数对象转为 key=value 形式的字符穿
+ * @param {object} data 参数对象
+ */
+function genQuery(data) {
+  let query = '';
+  if (Object.keys(data).length > 0) {
+    for (const key in data) {
+      query += `${key}=${data[key]}&`;
+    }
+  }
+  if (query.length > 0) {
+    return query.substring(0, query.length - 1);
+  }
+  return query;
+}
+
+/**
  * 登录
  * @param {Object} data
  */
@@ -50,12 +67,7 @@ export function getFriendList(data) {
  * @param {object} data 请求的参数
  */
 export function getTmpCredential(data) {
-  let query = '';
-  if (Object.keys(data).length > 0) {
-    for (const key in data) {
-      query += `${key}=${data[key]}`;
-    }
-  }
+  const query = genQuery(data);
   return request({
     url: `/userCenter/getTmpCredential?${query}`,
     method: 'get',
@@ -72,6 +84,21 @@ export function getTmpCredential(data) {
 export function getPublicKey() {
   return request({
     url: '/userCenter/getPublicKey',
+    method: 'get',
+		headers: {
+			apikey: 'usercenter'
+		}
+  });
+}
+
+/**
+ * 根据关键字，搜索用户
+ * @param {object} data 查询参数
+ */
+export function getUser(data) {
+  const query = genQuery(data);
+  return request({
+    url: `/userCenter/getUser?${query}`,
     method: 'get',
 		headers: {
 			apikey: 'usercenter'
