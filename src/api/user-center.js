@@ -105,3 +105,18 @@ export function getUser(data) {
 		}
   });
 }
+
+/**
+ * 新增朋友
+ * @param {object} data 当前用户UID、朋友的UID
+ */
+export function addFriend(data) {
+  return request({
+    url: '/userCenter/addFriend',
+    method: 'post',
+    data: data,
+		headers: {
+			apikey: 'usercenter'
+		}
+  });
+}

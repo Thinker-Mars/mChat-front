@@ -1,4 +1,7 @@
 import router from '@/router';
+import { getDataByKey } from '@/utils/db/dbUtil';
+import { TABLE_LIST } from '@/utils/constants/db-constant';
+
 const state = {
   /**
 	 * 预览消息，entry格式如下：
@@ -7,6 +10,8 @@ const state = {
 	 *   Msg: 消息
 	 *   Timestamp: 消息产生的时间戳(ms)
 	 *   UnReadMsgCount: 未读消息数
+   *   Avatar: 预览头像,
+   *   NickName: 昵称
 	 * }
 	 */
   msgList: [],
@@ -33,17 +38,25 @@ const mutations = {
 	 * @param {*} Msg 新消息
 	 * @param {number} Timestamp 消息产生的时间
 	 */
-  UPDATE_MSG: (state, updateMsg) => {
+  UPDATE_MSG: async(state, updateMsg) => {
     const { msgList } = state;
     const { Uid, Msg, Timestamp } = updateMsg;
+    let avatar = '';
+    let nickName = '';
     for (let i = 0; i < msgList.length; i++) {
       if (msgList[i].Uid === Uid) {
+        avatar = msgList[i].Avatar;
         msgList.splice(i, 1);
         break;
       }
     }
+    if (!avatar) {
+      const { data } = await getDataByKey(TABLE_LIST.FriendInfo, Uid);
+      avatar = data.Avatar;
+      nickName = data.NickName;
+    }
     // 没有已存在的窗口，新建一个窗口
-    msgList.unshift({ Uid, Msg, Timestamp });
+    msgList.unshift({ Uid, Msg, Timestamp, Avatar: avatar, NickName: nickName });
   },
   /**
 	 * 修改预览消息内容
@@ -176,7 +189,7 @@ const mutations = {
 	 * 从好友名片页发起聊天
 	 * 如果已存在预览窗口，就将其置顶，不存在就新建一个预览窗口
 	 */
-	CHECK_MSG_BY_UID: (state, uid) => {
+	CHECK_MSG_BY_UID: async(state, uid) => {
 		const { msgList } = state;
 		const pos = msgList.findIndex((msg) => msg.Uid === uid);
 		if (pos !== -1) {
@@ -184,7 +197,16 @@ const mutations = {
 			msgList.unshift(existMsg);
 		} else {
 			// 没有已存在的窗口，新建一个窗口
-			msgList.unshift({ Uid: uid, Msg: '', Timestamp: (new Date()).getTime() });
+      const { data } = await getDataByKey(TABLE_LIST.FriendInfo, uid);
+			msgList.unshift(
+        {
+          Uid: uid,
+          Msg: '',
+          Timestamp: (new Date()).getTime(),
+          UnReadMsgCount: 0,
+          Avatar: data.Avatar,
+          NickName: data.NickName
+        });
 		}
 	},
 	/**

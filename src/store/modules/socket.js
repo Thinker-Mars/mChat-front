@@ -18,7 +18,7 @@ const mutations = {
     const { io } = state.socket;
     const socketId = io.id;
     const data = { uid, socketId };
-    io.emit('initUserRoom', data);
+    io.emit('login', data);
   }
 };
 
@@ -50,7 +50,7 @@ const actions = {
   /**
 	 * 初始化一些事件监听
 	 */
-  initEvent({ commit, dispatch, state }, initData) {
+  initEvent({ commit, state }, initData) {
     const { socket } = state;
     const { uid, component } = initData;
     socket.subscribe('connect', function() {
@@ -58,12 +58,15 @@ const actions = {
     }, component);
     /** 收到聊天数据 */
     socket.subscribe('receiveUserMsg', function(data) {
-      dispatch('previewMsg/receiveMsg', data);
+      component.$store.dispatch('previewMsg/receiveMsg', data);
     }, component);
     /** 收到好友申请的数据 */
     socket.subscribe('receiveFriendApplyMsg', function(data) {
-      console.log(data, 'datatttt');
-      dispatch('friend/receiveApply', data);
+      component.$store.dispatch('friend/receiveApply', data);
+    }, component);
+    /** 收到好友确认的数据 */
+    socket.subscribe('receiveFriendConfirmMsg', function(data) {
+      component.$store.dispatch('friend/receiveConfirm', data);
     }, component);
   },
   /**
@@ -80,6 +83,14 @@ const actions = {
   sendFriendApply({ state }, data) {
     const { io } = state.socket;
     io.emit('sendFriendApply', data);
+  },
+  /**
+   * 发送 确认好友 的信息（通知对方客户端更新好友列表）
+   * @param {object} data 当前登录用户的信息
+   */
+  sendFriendConfirm({ state }, data) {
+    const { io } = state.socket;
+    io.emit('sendFriendConfirm', data);
   }
 };
 

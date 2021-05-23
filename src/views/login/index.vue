@@ -81,8 +81,8 @@ export default {
 									that.uid = Uid;
 									// 清空DB
 									await dropDatabase(DATABASE_NAME);
-									// 好友信息获取后，再跳转
 									await that.initDatabase();
+									await that.initFriendList();
 									// 获取离线消息
 									// that.fetchOfflineMsg();
 									that.$store.dispatch('user/setUserInfo', res.data.userinfo);
@@ -105,10 +105,7 @@ export default {
 		initDatabase() {
 			return new Promise((resolve, reject) => {
 				initDB(DATABASE_NAME).then(
-					async() => {
-						const friendList = await this.fetchFriendList();
-						this.$store.dispatch('friend/setFriendList', JSON.parse(JSON.stringify(friendList)));
-						this.initFriendList(friendList);
+					() => {
 						resolve();
 					}
 				);
@@ -117,7 +114,9 @@ export default {
 		/**
 		 * 初始化好友列表
 		 */
-		initFriendList(friendList) {
+		async initFriendList() {
+			const friendList = await this.fetchFriendList();
+			this.$store.dispatch('friend/setFriendList', JSON.parse(JSON.stringify(friendList)));
 			this.clearFriendList().then(
 				() => {
 					const msgMap = new Map();

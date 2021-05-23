@@ -36,7 +36,7 @@
               <img :src="friendInfo.Avatar">
             </div>
             <div class="note">
-              {{ friendInfo.NoteName || friendInfo.NickName }}
+              {{ friendInfo.NickName }}
             </div>
           </div>
         </div>
@@ -105,9 +105,8 @@ export default {
 				return groupedFriendList;
 			}
 			friendList.forEach((friendInfo) => {
-				const { NickName, NoteName } = friendInfo;
-				// 首先按照备注排序，如果没有备注，就按照昵称排序
-				const judgeName = NoteName || NickName;
+				const { NickName } = friendInfo;
+				const judgeName = NickName;
 				// 获取首个字符
 				const firstCharacter = judgeName.substring(0, 1);
 				if (this.isEnglishCharacter(firstCharacter)) {

@@ -16,7 +16,7 @@
 			</div>
 			<div v-for="(applyUser, index) in applyList" v-else :key="index" class="card">
 				<div class="img-container">
-					<img src="@/assets/img/user/preview.jpg">
+					<img :src="applyUser.Avatar">
 				</div>
 				<div class="info">
 					<div class="name">
@@ -25,9 +25,14 @@
 					<div class="greet">
 						{{ applyUser.Greet }}
 					</div>
-					<div class="operate">
-						<a-button type="primary" @click="apply(applyUser.Uid)">
+					<div v-show="!applyUser.Agree" class="operate">
+						<a-button type="primary" @click="apply(applyUser.ProducerID)">
 							同意
+						</a-button>
+					</div>
+					<div v-show="applyUser.Agree" class="operate">
+						<a-button type="primary">
+							发消息
 						</a-button>
 					</div>
 				</div>
@@ -61,7 +66,7 @@
 					<div class="motto">
 						{{ matchUser.Motto }}
 					</div>
-					<div v-if="matchUser.IsFriend === 2" class="operate">
+					<div class="operate">
 						<a-button type="primary" @click="add(matchUser.Uid)" :disabled="matchUser.hasSendApply">
 							添加
 						</a-button>
@@ -84,7 +89,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { getUser } from '@/api/user-center';
+import { getUser, addFriend } from '@/api/user-center';
 import { RequestCode } from '@/utils/constants/request-constant';
 export default {
 	name: 'NewFriend',
@@ -99,29 +104,10 @@ export default {
 			 * true表示正在搜索中
 			 */
 			searching: false,
-			// /**
-			//  * 好友申请列表
-			//  */
-			// applyList: [
-			// 	// {
-			// 	// 	Uid: 11111,
-			// 	// 	NickName: 'Cone',
-			// 	// 	Avatar: '',
-			// 	// 	Greet: '你好'
-			// 	// }
-			// ],
 			/**
 			 * 搜索匹配的用户列表
 			 */
-			matchList: [
-				// {
-				// 	Uid: 11111,
-				// 	NickName: 'Cone',
-				// 	Avatar: '',
-				// 	Motto: '用户备注',
-				// 	IsFriend: 2
-				// }
-			],
+			matchList: [],
 			/**
 			 * 记录前一次的查询关键字
 			 */
@@ -163,8 +149,30 @@ export default {
 		 * 同意好友申请
 		 * @param uid 申请人的id
 		 */
-		apply(uid) {
-			console.log(uid, 'uid');
+		apply(applyID) {
+			this.$store.dispatch('friend/agreeApply', applyID);
+			const param = {
+				Uid: this.loginUserInfo.Uid,
+				FriendUid: applyID
+			};
+			addFriend(param).then(
+				(res) => {
+					if (res.code === RequestCode.Success) {
+						this.$store.dispatch(
+							'socket/sendFriendConfirm',
+							{
+								ProducerID: this.loginUserInfo.Uid,
+								ConsumerID: applyID,
+								NickName: this.loginUserInfo.NickName,
+								Avatar: this.loginUserInfo.Avatar,
+								Gender: this.loginUserInfo.Gender,
+								Motto: this.loginUserInfo.Motto
+							}
+						);
+						this.successTip('操作成功', '添加成功，现在可以开始聊天啦~');
+					}
+				}
+			);
 		},
 		/**
 		 * 添加好友
@@ -194,7 +202,7 @@ export default {
 		 * 处理 [好友申请]对话框 的 确认
 		 */
 		handleOK() {
-			// this.changeSendFlag(this.currentApplyUID);
+			this.changeSendFlag(this.currentApplyUID);
 			this.$store.dispatch(
 				'socket/sendFriendApply',
 				{
@@ -202,7 +210,9 @@ export default {
 					ConsumerID: this.currentApplyUID,
 					NickName: this.loginUserInfo.NickName,
 					Avatar: this.loginUserInfo.Avatar,
-					Greet: this.greet
+					Greet: this.greet,
+					Gender: this.loginUserInfo.Gender,
+					Motto: this.loginUserInfo.Motto
 				}
 			);
 			this.closeApplyModal();

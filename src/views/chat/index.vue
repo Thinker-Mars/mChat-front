@@ -17,11 +17,11 @@
             {{ preview.UnReadMsgCount }}
           </div>
           <div class="img-box">
-            <img src="@/assets/img/user/preview.jpg">
+            <img :src="preview.Avatar">
           </div>
           <div class="msg-box">
             <div class="top">
-              <span class="name">Lucky</span>
+              <span class="name">{{ preview.NickName }}</span>
               <span class="time">{{ tellTime(preview.Timestamp, 1) }}</span>
             </div>
             <div

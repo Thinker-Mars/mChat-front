@@ -24,7 +24,7 @@
           class="receive-msg-box"
         >
           <div class="chat-user-img">
-            <img src="@/assets/img/user/preview.jpg">
+            <img :src="friendInfo.Avatar">
           </div>
           <div class="receiver-outter">
             <div class="left-arrow" />
@@ -49,7 +49,7 @@
           />
           <div class="chat-user-img">
             <div class="right-arrow" />
-            <img src="@/assets/img/user/cone.jpg">
+            <img :src="loginUserInfo.Avatar">
           </div>
         </div>
       </div>
@@ -192,7 +192,7 @@ export default {
       // 更新左侧预览列表数据
       this.updatePreviewMsg(msg, timestamp);
       // 将消息发给朋友
-      this.sendToFriend(this.loginUserInfo.uid, this.friendUid, msg, timestamp);
+      this.sendToFriend(this.loginUserInfo.Uid, this.friendUid, msg, timestamp);
       // 清空输入框
       this.clearMsg();
       // 页面滚动至最新的那条信息的位置
