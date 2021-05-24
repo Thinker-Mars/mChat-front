@@ -197,9 +197,13 @@ export default {
 					top: 0;
 					.name {
 						display: inline-block;
+						width: 100%;
 						text-align: left;
 						color: #000000;
 						font-size: 16px;
+						white-space: nowrap;
+						text-overflow: ellipsis;
+						overflow: hidden;
 					}
 					.time {
 						float: right;

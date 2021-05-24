@@ -134,8 +134,15 @@ export default {
 		if (Uid) {
 			this.initData();
 			this.checkTableBeforeChat();
+			this.listen();
+			this.toLatestMsg();
 		}
   },
+	beforeDestroy() {
+		this.$EventBus.$off(this.this.chatTableName, (data) => {
+			console.log(data, 'data');
+		});
+	},
   methods: {
     /**
 		 * 初始化聊天组件基本数据
@@ -176,6 +183,17 @@ export default {
 			}
     },
 
+		listen() {
+			this.$EventBus.$on(this.chatTableName, (data) => {
+				const { Msg, Timestamp } = data;
+				this.msgList.push({
+					Type: 1,
+					Content: Msg,
+					Timestamp
+				});
+			});
+		},
+
     /**
 		 * 发送消息
 		 */
@@ -186,7 +204,7 @@ export default {
         return;
       }
       // 本地存储消息
-      this.storageData(this.chatTableName, msg, timestamp);
+      // this.storageData(this.chatTableName, msg, timestamp);
       // 更新页面聊天数据
       this.updateChatMsgList(msg, timestamp);
       // 更新左侧预览列表数据
@@ -237,7 +255,8 @@ export default {
       const previewMsg = {
         Uid: this.friendUid,
         Msg,
-        Timestamp
+        Timestamp,
+				MsgDirection: 2
       };
       this.$store.dispatch('previewMsg/updateMsg', previewMsg);
       this.$store.dispatch('previewMsg/updateSelected', 0);

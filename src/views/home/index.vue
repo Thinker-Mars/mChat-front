@@ -47,6 +47,14 @@ export default {
         myNotification.close();
       };
     },
+		/**
+		 * 分发消息
+		 */
+		dispatchMsg(data) {
+			const { ProducerID } = data;
+			const listener = `${ProducerID}-chat`;
+			this.$EventBus.$emit(listener, data);
+		},
 
     /**
 		 * 根据当前时间，获取登录后，app打招呼的内容

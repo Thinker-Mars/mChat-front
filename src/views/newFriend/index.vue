@@ -80,6 +80,7 @@
       centered
 			:maskClosable="false"
 			okText="发送"
+			cancelText="取消"
       @ok="handleOK"
     >
 			<a-input v-model="greet" placeholder="打个招呼吧~" />

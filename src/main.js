@@ -21,6 +21,7 @@ Vue.config.productionTip = false;
 Vue.prototype.tellTime = tellTime;
 Vue.prototype.$Notification = Notification;
 Vue.prototype.$Success = Modal.success;
+Vue.prototype.$EventBus = new Vue();
 
 new Vue({
   router,

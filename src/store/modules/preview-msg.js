@@ -1,5 +1,5 @@
 import router from '@/router';
-import { getDataByKey } from '@/utils/db/dbUtil';
+import { addRecord, getDataByKey, existTable, createChatTable } from '@/utils/db/dbUtil';
 import { TABLE_LIST } from '@/utils/constants/db-constant';
 
 const state = {
@@ -32,20 +32,23 @@ const state = {
 const mutations = {
   /**
 	 * 根据uid更新消息预览列表数据
+	 * 同时db存储收到的消息
 	 * @param {*} state
 	 * @param {object} updateMsg 消息对象 包含如下信息：
 	 * @param {number} Uid 聊天对象的uid
 	 * @param {*} Msg 新消息
 	 * @param {number} Timestamp 消息产生的时间
+	 * @param {number} MsgDirection 消息方向，1：接收 2：发送
 	 */
   UPDATE_MSG: async(state, updateMsg) => {
     const { msgList } = state;
-    const { Uid, Msg, Timestamp } = updateMsg;
+    const { Uid, Msg, Timestamp, MsgDirection } = updateMsg;
     let avatar = '';
     let nickName = '';
     for (let i = 0; i < msgList.length; i++) {
       if (msgList[i].Uid === Uid) {
         avatar = msgList[i].Avatar;
+				nickName = msgList[i].NickName;
         msgList.splice(i, 1);
         break;
       }
@@ -57,6 +60,18 @@ const mutations = {
     }
     // 没有已存在的窗口，新建一个窗口
     msgList.unshift({ Uid, Msg, Timestamp, Avatar: avatar, NickName: nickName });
+		const msgData = {
+			Type: MsgDirection,
+			Content: Msg,
+			Timestamp
+		};
+		const tableName = `${Uid}-chat`;
+		// 判断表是否存在
+		const haveTable = await existTable(tableName);
+		if (!haveTable) {
+			await createChatTable(tableName);
+		}
+		addRecord(tableName, msgData);
   },
   /**
 	 * 修改预览消息内容
@@ -275,7 +290,7 @@ const actions = {
   receiveMsg({ commit }, data) {
     const { ProducerID, Msg, Timestamp } = data;
     // 更新消息
-    commit('UPDATE_MSG', { Uid: ProducerID, Msg, Timestamp });
+    commit('UPDATE_MSG', { Uid: ProducerID, Msg, Timestamp, MsgDirection: 1 });
     // 更新未读消息数
     commit('CNAHGE_MSG_COUNT', ProducerID, 1);
   },

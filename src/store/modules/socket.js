@@ -59,6 +59,7 @@ const actions = {
     /** 收到聊天数据 */
     socket.subscribe('receiveUserMsg', function(data) {
       component.$store.dispatch('previewMsg/receiveMsg', data);
+			component.dispatchMsg(data);
     }, component);
     /** 收到好友申请的数据 */
     socket.subscribe('receiveFriendApplyMsg', function(data) {
