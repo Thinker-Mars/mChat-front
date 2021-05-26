@@ -66,7 +66,7 @@ const mutations = {
 		const { ProducerID, NickName, Avatar, Gender, Motto } = friendInfo;
 		// 更新页面好友列表
 		friendList.push({ Uid: ProducerID, NickName, Avatar, Gender, Motto });
-		// 更新db，因为查看好友详情时，会根据UID读取db
+		// // 更新db，因为查看好友详情时，会根据UID读取db
 		await addRecord(TABLE_LIST.FriendInfo, { Uid: ProducerID, NickName, Avatar, Gender, Motto });
 	}
 };

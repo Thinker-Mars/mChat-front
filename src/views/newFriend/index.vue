@@ -31,7 +31,7 @@
 						</a-button>
 					</div>
 					<div v-show="applyUser.Agree" class="operate">
-						<a-button type="primary">
+						<a-button type="primary" @click="chat(applyUser.ProducerID)">
 							发消息
 						</a-button>
 					</div>
@@ -182,6 +182,14 @@ export default {
 		add(Uid) {
 			this.currentApplyUID = Uid;
 			this.openApplyModal();
+		},
+		/**
+		 * 与朋友聊天
+		 * @param uid 用户id
+		 */
+		chat(Uid) {
+			this.$store.dispatch('previewMsg/chatFromFriendCard', Uid);
+			this.$router.push({ path: `/home/chat/${Uid}` });
 		},
 		/**
 		 * 将 [发送申请标志] 更改为 [已发送]

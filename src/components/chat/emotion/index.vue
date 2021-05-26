@@ -35,6 +35,15 @@ export default {
     openToggle() {
       this.showEmotion = !this.showEmotion;
     },
+		/**
+		 * 供外部调用
+		 * 关闭表情选择
+		 */
+		close() {
+			if (this.showEmotion) {
+				this.showEmotion = false;
+			}
+		},
     chooseEmotion(index, src) {
       this.$emit('chooseEmotion', index, src);
       this.openToggle();

@@ -77,6 +77,38 @@ export default {
       'totalUnreadMsgCount'
     ])
   },
+	watch: {
+		'$route.path': function(newVal, oldVal) {
+			// 前往 [朋友]页
+			if (newVal.includes('/home/friend')) {
+				this.friendSrc = activeFriendUrl;
+				this.settingSrc = settingUrl;
+				this.ideaSrc = ideaUrl;
+				this.msgSrc = msgUrl;
+			}
+			// 前往 [消息]页
+			if (newVal.includes('/home/chat')) {
+				this.msgSrc = activeMsgUrl;
+				this.friendSrc = friendUrl;
+				this.settingSrc = settingUrl;
+				this.ideaSrc = ideaUrl;
+			}
+			// 前往 [想法]页
+			if (newVal.includes('/home/idea')) {
+				this.ideaSrc = activeideaUrl;
+				this.friendSrc = friendUrl;
+				this.settingSrc = settingUrl;
+				this.msgSrc = msgUrl;
+			}
+			// 前往 [设置]页
+			if (newVal.includes('/home/setting')) {
+				this.settingSrc = activeSettingUrl;
+				this.friendSrc = friendUrl;
+				this.ideaSrc = ideaUrl;
+				this.msgSrc = msgUrl;
+			}
+		}
+	},
   methods: {
     /**
 		 * 切换[消息页]状态

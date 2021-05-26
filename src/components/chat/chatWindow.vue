@@ -30,7 +30,6 @@
             <div class="left-arrow" />
             <span
               class="receive-msg"
-              @contextmenu="rightClick"
               @mouseenter="recordMsg(msg)"
               v-html="msg.Content"
             />
@@ -43,7 +42,6 @@
         >
           <span
             class="send-msg"
-            @contextmenu="rightClick"
             @mouseenter="recordMsg(msg)"
             v-html="msg.Content"
           />
@@ -59,7 +57,7 @@
       <!-- 辅助操作区 -->
       <div class="chatBar">
         <!-- 选择表情 -->
-        <emotion @chooseEmotion="chooseEmotion" />
+        <emotion ref="emotion" @chooseEmotion="chooseEmotion" />
       </div>
       <!-- 输入消息 -->
       <div
@@ -135,9 +133,11 @@ export default {
 			this.initData();
 			this.checkTableBeforeChat();
 			this.listen();
-			this.toLatestMsg();
 		}
   },
+	mounted() {
+		// this.registerElf();
+	},
 	beforeDestroy() {
 		this.$EventBus.$off(this.this.chatTableName, (data) => {
 			console.log(data, 'data');
@@ -192,6 +192,19 @@ export default {
 					Timestamp
 				});
 			});
+		},
+
+		registerElf() {
+			document.addEventListener('click', (e) => {
+				console.log(e);
+				this.closeEmotion(e);
+			});
+		},
+
+		closeEmotion(e) {
+			if (e.target.className !== 'emotion-switch') {
+				this.$refs.emotion.close();
+			}
 		},
 
     /**

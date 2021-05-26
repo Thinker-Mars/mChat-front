@@ -33,7 +33,6 @@ const mutations = {
   /**
 	 * 根据uid更新消息预览列表数据
 	 * 同时db存储收到的消息
-	 * @param {*} state
 	 * @param {object} updateMsg 消息对象 包含如下信息：
 	 * @param {number} Uid 聊天对象的uid
 	 * @param {*} Msg 新消息
@@ -41,25 +40,36 @@ const mutations = {
 	 * @param {number} MsgDirection 消息方向，1：接收 2：发送
 	 */
   UPDATE_MSG: async(state, updateMsg) => {
-    const { msgList } = state;
+    const { msgList, currentUid } = state;
     const { Uid, Msg, Timestamp, MsgDirection } = updateMsg;
-    let avatar = '';
-    let nickName = '';
+		let originMsg = {};
     for (let i = 0; i < msgList.length; i++) {
       if (msgList[i].Uid === Uid) {
-        avatar = msgList[i].Avatar;
-				nickName = msgList[i].NickName;
-        msgList.splice(i, 1);
+        originMsg = msgList.splice(i, 1)[0];
         break;
       }
     }
-    if (!avatar) {
-      const { data } = await getDataByKey(TABLE_LIST.FriendInfo, Uid);
-      avatar = data.Avatar;
-      nickName = data.NickName;
-    }
+		if (Object.keys(originMsg).length > 0) {
+			originMsg = Object.assign(originMsg, {
+				UnReadMsgCount: currentUid !== Uid ? originMsg.UnReadMsgCount + 1 : 0,
+				Msg,
+				Timestamp
+			});
+		} else {
+			const { data } = await getDataByKey(TABLE_LIST.FriendInfo, Uid);
+			originMsg.Avatar = data.Avatar;
+			originMsg.NickName = data.NickName;
+			originMsg = {
+				Avatar: data.Avatar,
+				NickName: data.NickName,
+				Uid,
+				Msg,
+				Timestamp,
+				UnReadMsgCount: 1
+			};
+		}
     // 没有已存在的窗口，新建一个窗口
-    msgList.unshift({ Uid, Msg, Timestamp, Avatar: avatar, NickName: nickName });
+    msgList.unshift(originMsg);
 		const msgData = {
 			Type: MsgDirection,
 			Content: Msg,
@@ -76,7 +86,6 @@ const mutations = {
   /**
 	 * 修改预览消息内容
 	 * 删除聊天触发此操作
-	 * @param {*} state
 	 * @param {object} changeMsg
 	 */
   CHANGE_MSG: (state, changeMsg) => {
@@ -92,7 +101,6 @@ const mutations = {
   },
   /**
 	 * 预览列表新增一条消息
-	 * @param {*} state
 	 * @param {object} addMsg 消息对象(内容参考上面)
 	 */
   ADD_MSG: (state, addMsg) => {
@@ -102,7 +110,6 @@ const mutations = {
   },
   /**
 	 * 根据uid删除匹配的预览消息
-	 * @param {*} state
 	 * @param {number} uid 要删除消息的uid
 	 */
   DELETE_MSG: (state, uid) => {
@@ -125,7 +132,6 @@ const mutations = {
   },
   /**
 	 * 置顶预览消息
-	 * @param {*} state
 	 * @param {number} uid 要置顶的消息的uid
 	 */
   PLACED_TOP_MSG: (state, uid) => {
@@ -148,7 +154,6 @@ const mutations = {
   },
   /**
 	 * 更新当前选中的窗口
-	 * @param {*} state
 	 * @param {number} index 当前选中预览窗口的索引
 	 */
   UPDATE_SELECTED: (state, index) => {
@@ -159,7 +164,6 @@ const mutations = {
   },
   /**
 	 * 更新当前聊天对象的uid
-	 * @param {*} state
 	 * @param {number} uid 当前聊天对象的uid
 	 */
   UPDATE_CURRENTUID: (state, uid) => {
@@ -170,7 +174,6 @@ const mutations = {
   },
   /**
 	 * 查看消息，清空对应uid下的未读消息数
-	 * @param {*} state
 	 * @param {number} uid 当前聊天对象的uid
 	 */
   CONFIRM_MSG: (state, uid) => {
@@ -180,23 +183,6 @@ const mutations = {
         const msgCount = msgList[i].UnReadMsgCount;
         msgList[i].UnReadMsgCount = 0;
         state.totalUnreadMsgCount -= msgCount;
-      }
-    }
-  },
-  /**
-	 * 更新未读消息数
-	 */
-  CNAHGE_MSG_COUNT: (state, uid, msgCount) => {
-    const { currentUid } = state;
-    // 当前打开窗口不是新消息来源者的时候，才累加未读消息数
-    if (currentUid !== uid) {
-      const { msgList } = state;
-      for (let i = 0; i < msgList.length; i++) {
-        if (msgList[i].Uid === uid) {
-          msgList[i].UnReadMsgCount += msgCount;
-          state.totalUnreadMsgCount += msgCount;
-          break;
-        }
       }
     }
   },
@@ -234,6 +220,32 @@ const mutations = {
 			msgList.push(msg);
 			state.totalUnreadMsgCount += msg.UnReadMsgCount;
 		});
+	},
+	/**
+	 * 从聊天页发起聊天
+	 * @param {number} uid 朋友的uid
+	 */
+	CHAT_FROM_FRIENDCARD: async(state, uid) => {
+		const { msgList } = state;
+		const pos = msgList.findIndex((msg) => msg.Uid === uid);
+		if (pos !== -1) {
+			const existMsg = msgList.splice(pos, 1)[0];
+			msgList.unshift(existMsg);
+		} else {
+			// 没有已存在的窗口，新建一个窗口
+      const { data } = await getDataByKey(TABLE_LIST.FriendInfo, uid);
+			msgList.unshift(
+        {
+          Uid: uid,
+          Msg: '',
+          Timestamp: (new Date()).getTime(),
+          UnReadMsgCount: 0,
+          Avatar: data.Avatar,
+          NickName: data.NickName
+        });
+		}
+		state.selectedPreview = 0;
+		state.currentUid = uid;
 	}
 };
 
@@ -291,8 +303,6 @@ const actions = {
     const { ProducerID, Msg, Timestamp } = data;
     // 更新消息
     commit('UPDATE_MSG', { Uid: ProducerID, Msg, Timestamp, MsgDirection: 1 });
-    // 更新未读消息数
-    commit('CNAHGE_MSG_COUNT', ProducerID, 1);
   },
 	/**
 	 * 保存收到的离线预览消息
@@ -305,9 +315,7 @@ const actions = {
 	 * 从好友名片页发起聊天
 	 */
 	chatFromFriendCard({ commit }, uid) {
-		commit('CHECK_MSG_BY_UID', uid);
-		commit('UPDATE_SELECTED', 0);
-		commit('UPDATE_CURRENTUID', uid);
+		commit('CHAT_FROM_FRIENDCARD', uid);
 	}
 };
 

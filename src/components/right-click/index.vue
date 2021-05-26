@@ -35,11 +35,11 @@ export default {
   },
   methods: {
     /**
-         * 打开右键菜单
-         * @param {number} left 菜单左侧偏移
-         * @param {number} top 菜单顶部偏移
-         * @param {number} width 菜单宽度
-         */
+		 * 打开右键菜单
+		 * @param {number} left 菜单左侧偏移
+		 * @param {number} top 菜单顶部偏移
+		 * @param {number} width 菜单宽度
+		 */
     open(left, top, width = 110) {
       this.left = left;
       this.top = top;
@@ -47,15 +47,15 @@ export default {
       this.showCommand = true;
     },
     /**
-         * 关闭右键菜单
-         */
+		 * 关闭右键菜单
+		 */
     close() {
       this.showCommand = false;
     },
     /**
-         * 执行选中的命令(由父组件执行)
-         * @param {string} command 要执行的命令的key
-         */
+		 * 执行选中的命令(由父组件执行)
+		 * @param {string} command 要执行的命令的key
+		 */
     execCommand(command) {
       this.close();
       this.$emit('handleExecCommand', command.commandKey);

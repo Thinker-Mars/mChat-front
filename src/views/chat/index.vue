@@ -8,7 +8,6 @@
           :class="selected == index ? 'preview active' : 'preview'"
           @click="checkMsgDetail(index, preview.Uid)"
           @mouseenter="recordPreviewMsg(preview)"
-          @contextmenu="rightClick"
         >
           <div
             v-show="preview.UnReadMsgCount > 0"
