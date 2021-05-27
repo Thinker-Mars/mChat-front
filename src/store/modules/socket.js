@@ -29,17 +29,17 @@ const actions = {
 				connection: 'http://47.92.82.34:9080',
         // connection: 'http://127.0.0.1:4000',
 				options: {
-					path: '/onlineCenter/connect',
-					extraHeaders: {
-						apikey: 'onlinecenter'
-					},
-					transportOptions: {
-						polling: {
-							extraHeaders: {
-								apikey: 'onlinecenter'
-							}
-						}
-					}
+					path: '/onlineCenter/connect'
+					// extraHeaders: {
+					// 	apikey: 'onlinecenter'
+					// },
+					// transportOptions: {
+					// 	polling: {
+					// 		extraHeaders: {
+					// 			apikey: 'onlinecenter'
+					// 		}
+					// 	}
+					// }
 				},
 				debug: true
 			});

@@ -83,7 +83,7 @@ export default {
 									await that.initDatabase();
 									await that.initFriendList();
 									// 获取离线消息
-									// that.fetchOfflineMsg();
+									that.fetchOfflineMsg();
 									that.$store.dispatch('user/setUserInfo', res.data.userinfo);
 									// 建立socket连接，初始化监听
 									that.$store.dispatch('socket/connectSystem').then(() => {

@@ -4,7 +4,8 @@ import axios from 'axios';
 
 // 创建axios实例
 const service = axios.create({
-  baseURL: '/dev-api',
+  // baseURL: '/dev-api',
+	baseURL: 'http://47.92.82.34:9080',
   timeout: 15000
 });
 
