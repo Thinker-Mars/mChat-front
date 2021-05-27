@@ -3,6 +3,7 @@ import { TABLE_LIST } from '@/utils/constants/db-constant';
 
 const state = {
   checkfriendUid: undefined, // [朋友]页查看的朋友的uid
+	lookNewFriend: false, // 是否正在查看[新的朋友]
   friendList: [], // 朋友列表数据
 	applyList: [] // 好友申请列表
 };
@@ -68,6 +69,13 @@ const mutations = {
 		friendList.push({ Uid: ProducerID, NickName, Avatar, Gender, Motto });
 		// // 更新db，因为查看好友详情时，会根据UID读取db
 		await addRecord(TABLE_LIST.FriendInfo, { Uid: ProducerID, NickName, Avatar, Gender, Motto });
+	},
+	/**
+	 * 修改 正在查看[新的朋友] 状态
+	 * @param {boolean} lookNewFriend
+	 */
+	LOOK_NEW_FRIEND: (state, lookNewFriend) => {
+		state.lookNewFriend = lookNewFriend;
 	}
 };
 
@@ -105,6 +113,9 @@ const actions = {
 	 */
 	agreeApply({ commit }, applyID) {
 		commit('AGREE_APPLY', applyID);
+	},
+	lookNewFriend({ commit }, lookNewFriend) {
+		commit('LOOK_NEW_FRIEND', lookNewFriend);
 	}
 };
 

@@ -29,7 +29,7 @@
           <div
             v-for="(friendInfo) in groupedFriend.list"
             :key="friendInfo.Uid"
-            :class="checkfriendUid === friendInfo.Uid ? 'card active' : 'card'"
+            :class="checkfriendUid === friendInfo.Uid && !lookNewFriend ? 'card active' : 'card'"
             @click="checkFriendDetail(friendInfo.Uid)"
           >
             <div class="img-container">
@@ -210,6 +210,7 @@ export default {
 			this.lookNewFriend = false;
 			// 记录当前查看的朋友详情的uid
 			this.$store.dispatch('friend/setFriendUID', friendUid);
+			this.$store.dispatch('friend/lookNewFriend', false);
 			if (this.allowJump(friendUid)) {
 				this.$router.push(`/home/friend/${friendUid}`);
 			}
@@ -221,6 +222,7 @@ export default {
 			this.lookNewFriend = true;
 			const { path } = this.$route;
 			const newFriendPath = '/home/friend/newFriend';
+			this.$store.dispatch('friend/lookNewFriend', true);
 			if (path !== newFriendPath) {
 				this.$router.push(newFriendPath);
 			}

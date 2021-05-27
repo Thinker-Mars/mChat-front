@@ -1,3 +1,4 @@
+/* eslint-disable no-mixed-spaces-and-tabs */
 'use strict';
 
 import { app, protocol, BrowserWindow } from 'electron';
@@ -18,6 +19,8 @@ function createWindow() {
   win = new BrowserWindow({
     width: 800,
     height: 600,
+		minWidth: 800,
+  	minHeight: 600,
     webPreferences: {
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info

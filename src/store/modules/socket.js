@@ -26,8 +26,8 @@ const actions = {
   connectSystem({ commit }) {
     return new Promise((resolve, reject) => {
 			const socket = new SocketIO({
-				// connection: 'http://47.92.82.34:9080',
-        connection: 'http://127.0.0.1:4000',
+				connection: 'http://47.92.82.34:9080',
+        // connection: 'http://127.0.0.1:4000',
 				options: {
 					path: '/onlineCenter/connect',
 					extraHeaders: {

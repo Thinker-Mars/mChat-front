@@ -7,6 +7,8 @@ const getters = {
   friendList: (state) => state.friend.friendList,
   /** 好友申请列表 */
   applyList: (state) => state.friend.applyList,
+	/** 是否正在查看[新的朋友] */
+	lookNewFriend: (state) => state.friend.lookNewFriend,
   /** socket连接实例 */
   socket: (state) => state.socket.socket,
   /** 消息预览列表 */
